@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
   Menu,
@@ -8,17 +8,20 @@ import {
   Sun,
   X,
   ChevronDown,
-  LayoutDashboard,
   GraduationCap,
-  Briefcase
+  Briefcase,
+  LogOut
 } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/context/AuthContext";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 interface NavbarProps {
   className?: string;
@@ -29,6 +32,8 @@ interface NavbarProps {
 export function Navbar({ className, setDarkMode, isDarkMode }: NavbarProps) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { user, userDetails, signOut } = useAuth();
+  const navigate = useNavigate();
   
   // Listen to scroll events
   useEffect(() => {
@@ -50,6 +55,20 @@ export function Navbar({ className, setDarkMode, isDarkMode }: NavbarProps) {
       localStorage.setItem("theme", isDarkMode ? "light" : "dark");
       document.documentElement.classList.toggle("dark");
     }
+  };
+
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      navigate("/");
+    } catch (error) {
+      console.error("Error signing out:", error);
+    }
+  };
+
+  const getInitials = (name: string) => {
+    if (!name) return "?";
+    return name.split(" ").map(part => part.charAt(0).toUpperCase()).join("");
   };
 
   return (
@@ -102,7 +121,6 @@ export function Navbar({ className, setDarkMode, isDarkMode }: NavbarProps) {
             </DropdownMenuContent>
           </DropdownMenu>
           
-          <Link to="/pricing" className="nav-link">Pricing</Link>
           <Link to="/community" className="nav-link">Community</Link>
           <Link to="/about" className="nav-link">About</Link>
           <Link to="/contact" className="nav-link">Contact</Link>
@@ -112,12 +130,46 @@ export function Navbar({ className, setDarkMode, isDarkMode }: NavbarProps) {
           <Button onClick={toggleDarkMode} variant="ghost" size="icon" className="rounded-full">
             {isDarkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
           </Button>
-          <Link to="/login">
-            <Button variant="outline">Log in</Button>
-          </Link>
-          <Link to="/signup">
-            <Button className="btn-gradient">Sign up</Button>
-          </Link>
+          
+          {user ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="rounded-full">
+                  <Avatar className="h-8 w-8">
+                    <AvatarImage src="/avatar.png" alt={userDetails?.first_name || "User"} />
+                    <AvatarFallback>
+                      {userDetails?.first_name ? getInitials(userDetails.first_name) : "U"}
+                    </AvatarFallback>
+                  </Avatar>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem asChild>
+                  <Link to="/welcome">Dashboard</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/profile">Profile</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/settings">Settings</Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleSignOut}>
+                  <LogOut className="h-4 w-4 mr-2" />
+                  <span>Log out</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <>
+              <Link to="/login">
+                <Button variant="outline">Log in</Button>
+              </Link>
+              <Link to="/signup">
+                <Button className="btn-gradient">Sign up</Button>
+              </Link>
+            </>
+          )}
         </div>
 
         {/* Mobile Nav */}
@@ -125,6 +177,18 @@ export function Navbar({ className, setDarkMode, isDarkMode }: NavbarProps) {
           <Button onClick={toggleDarkMode} variant="ghost" size="icon" className="rounded-full">
             {isDarkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
           </Button>
+          
+          {user && (
+            <Button variant="ghost" size="icon" className="rounded-full">
+              <Avatar className="h-8 w-8">
+                <AvatarImage src="/avatar.png" alt={userDetails?.first_name || "User"} />
+                <AvatarFallback>
+                  {userDetails?.first_name ? getInitials(userDetails.first_name) : "U"}
+                </AvatarFallback>
+              </Avatar>
+            </Button>
+          )}
+          
           <Button
             variant="ghost"
             size="icon"
@@ -156,18 +220,31 @@ export function Navbar({ className, setDarkMode, isDarkMode }: NavbarProps) {
               <span>For Companies</span>
             </Link>
           </div>
-          <Link to="/pricing" onClick={() => setIsMobileMenuOpen(false)} className="py-2 text-lg">Pricing</Link>
           <Link to="/community" onClick={() => setIsMobileMenuOpen(false)} className="py-2 text-lg">Community</Link>
           <Link to="/about" onClick={() => setIsMobileMenuOpen(false)} className="py-2 text-lg">About</Link>
           <Link to="/contact" onClick={() => setIsMobileMenuOpen(false)} className="py-2 text-lg">Contact</Link>
           
           <div className="flex flex-col gap-2 pt-4">
-            <Link to="/login" onClick={() => setIsMobileMenuOpen(false)}>
-              <Button variant="outline" className="w-full">Log in</Button>
-            </Link>
-            <Link to="/signup" onClick={() => setIsMobileMenuOpen(false)}>
-              <Button className="w-full btn-gradient">Sign up</Button>
-            </Link>
+            {user ? (
+              <>
+                <Link to="/welcome" onClick={() => setIsMobileMenuOpen(false)}>
+                  <Button variant="outline" className="w-full">Dashboard</Button>
+                </Link>
+                <Button variant="outline" className="w-full" onClick={handleSignOut}>
+                  <LogOut className="h-4 w-4 mr-2" />
+                  Log out
+                </Button>
+              </>
+            ) : (
+              <>
+                <Link to="/login" onClick={() => setIsMobileMenuOpen(false)}>
+                  <Button variant="outline" className="w-full">Log in</Button>
+                </Link>
+                <Link to="/signup" onClick={() => setIsMobileMenuOpen(false)}>
+                  <Button className="w-full btn-gradient">Sign up</Button>
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </div>
