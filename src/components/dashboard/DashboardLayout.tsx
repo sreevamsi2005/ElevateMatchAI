@@ -1,4 +1,3 @@
-
 import { ReactNode, useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
@@ -90,7 +89,7 @@ export function DashboardLayout({
         userDetails.specialization.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()) + " Student" : 
         "Student";
     } else if (userType === "company") {
-      return userDetails?.industry || "Company";
+      return "Company";
     }
     return "Administrator";
   };
