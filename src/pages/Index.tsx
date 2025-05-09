@@ -1,13 +1,48 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+
+import { useState, useEffect } from "react";
+import { Navbar } from "@/components/layout/Navbar";
+import { Footer } from "@/components/layout/Footer";
+import { Hero } from "@/components/landing/Hero";
+import { Features } from "@/components/landing/Features";
+import { HowItWorks } from "@/components/landing/HowItWorks";
+import { Testimonials } from "@/components/landing/Testimonials";
+import { Pricing } from "@/components/landing/Pricing";
+import { CTA } from "@/components/landing/CTA";
+import { ThemeProvider } from "@/components/ui/theme-provider";
 
 const Index = () => {
+  const [isDarkMode, setDarkMode] = useState(false);
+
+  useEffect(() => {
+    // Check if user has already set a preference
+    const storedTheme = localStorage.getItem("theme");
+    
+    if (storedTheme) {
+      setDarkMode(storedTheme === "dark");
+      document.documentElement.classList.toggle("dark", storedTheme === "dark");
+    } else {
+      // Check system preference
+      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      setDarkMode(prefersDark);
+      document.documentElement.classList.toggle("dark", prefersDark);
+    }
+  }, []);
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
-        <p className="text-xl text-gray-600">Start building your amazing project here!</p>
+    <ThemeProvider>
+      <div className="flex min-h-screen flex-col">
+        <Navbar isDarkMode={isDarkMode} setDarkMode={setDarkMode} />
+        <main className="flex-1">
+          <Hero />
+          <Features />
+          <HowItWorks />
+          <Testimonials />
+          <Pricing />
+          <CTA />
+        </main>
+        <Footer />
       </div>
-    </div>
+    </ThemeProvider>
   );
 };
 
