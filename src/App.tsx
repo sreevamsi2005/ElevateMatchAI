@@ -23,6 +23,8 @@ import Welcome from "./pages/Welcome";
 // Dashboard pages
 import StudentDashboard from "./pages/dashboard/StudentDashboard";
 import CompanyDashboard from "./pages/dashboard/CompanyDashboard";
+import UpdateProfile from "./pages/dashboard/UpdateProfile";
+import ResumeBuilder from "./pages/dashboard/ResumeBuilder";
 
 const queryClient = new QueryClient();
 
@@ -47,6 +49,8 @@ const App = () => (
               
               {/* Student Dashboard */}
               <Route path="/student-dashboard" element={<StudentDashboard />} />
+              <Route path="/student-dashboard/resume" element={<ResumeBuilder />} />
+              <Route path="/student-dashboard/update-profile" element={<UpdateProfile />} />
               <Route path="/student-dashboard/:section" element={<StudentDashboard />} />
               
               {/* Company Dashboard */}

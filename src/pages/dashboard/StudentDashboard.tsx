@@ -11,85 +11,43 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
+import { useAuth } from "@/context/AuthContext";
+import { navItems } from "@/utils/navItems";
 import {
   BarChart4,
   BookOpen,
   Briefcase,
   FileText,
   GraduationCap,
-  Home,
+  Calendar,
   MessageSquare,
-  Settings,
   Sparkles,
   BarChart,
-  Calendar,
   ArrowRight,
   CheckCircle2,
   Play,
   Award,
 } from "lucide-react";
-
-const navItems = [
-  {
-    title: "Overview",
-    href: "/student-dashboard",
-    icon: Home,
-  },
-  {
-    title: "Resume Builder",
-    href: "/student-dashboard/resume",
-    icon: FileText,
-  },
-  {
-    title: "Mock Interviews",
-    href: "/student-dashboard/interviews",
-    icon: MessageSquare,
-  },
-  {
-    title: "Career Roadmap",
-    href: "/student-dashboard/roadmap",
-    icon: GraduationCap,
-  },
-  {
-    title: "Skill Tests",
-    href: "/student-dashboard/skills",
-    icon: Sparkles,
-  },
-  {
-    title: "Job Board",
-    href: "/student-dashboard/jobs",
-    icon: Briefcase,
-  },
-  {
-    title: "Learning Path",
-    href: "/student-dashboard/learning",
-    icon: BookOpen,
-  },
-  {
-    title: "Analytics",
-    href: "/student-dashboard/analytics",
-    icon: BarChart,
-  },
-  {
-    title: "Settings",
-    href: "/student-dashboard/settings",
-    icon: Settings,
-  },
-];
+import { Link } from "react-router-dom";
 
 export default function StudentDashboard() {
   const [progress, setProgress] = useState(65);
+  const { userDetails } = useAuth();
+  
+  const firstName = userDetails?.first_name || "Student";
 
   return (
     <DashboardLayout userType="student" navItems={navItems}>
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Welcome back, Alex!</h1>
+            <h1 className="text-3xl font-bold tracking-tight">Welcome back, {firstName}!</h1>
             <p className="text-muted-foreground">Track your progress and career development</p>
           </div>
           <div className="hidden md:block">
-            <Button className="btn-gradient">Update Profile</Button>
+            <Button className="btn-gradient" asChild>
+              <Link to="/student-dashboard/update-profile">Update Profile</Link>
+            </Button>
           </div>
         </div>
 
@@ -190,9 +148,9 @@ export default function StudentDashboard() {
               ))}
 
               <Button variant="ghost" className="w-full" asChild>
-                <a href="/student-dashboard/jobs">
+                <Link to="/student-dashboard/jobs">
                   View all opportunities <ArrowRight className="ml-2 h-4 w-4" />
-                </a>
+                </Link>
               </Button>
             </CardContent>
           </Card>
@@ -272,8 +230,8 @@ export default function StudentDashboard() {
               </div>
             </div>
             <div className="flex items-center gap-4">
-              <Button className="btn-gradient">
-                Build Your Resume
+              <Button className="btn-gradient" asChild>
+                <Link to="/student-dashboard/resume">Build Your Resume</Link>
               </Button>
               <Button variant="outline" className="bg-white/50 dark:bg-gray-800/50">
                 <Play className="mr-2 h-4 w-4" />

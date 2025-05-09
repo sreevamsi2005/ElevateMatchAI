@@ -4,10 +4,25 @@ import { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
+interface UserDetails {
+  id: string;
+  user_type: string;
+  first_name?: string;
+  last_name?: string;
+  bio?: string;
+  education?: string;
+  location?: string;
+  phone?: string;
+  skills?: string;
+  specialization?: string;
+  created_at: string;
+  updated_at: string;
+}
+
 interface AuthContextProps {
   session: Session | null;
   user: User | null;
-  userDetails: any | null;
+  userDetails: UserDetails | null;
   isLoading: boolean;
   signUp: (email: string, password: string, metadata: any) => Promise<any>;
   signInWithEmail: (email: string, password: string) => Promise<any>;
@@ -20,7 +35,7 @@ export const AuthContext = createContext<AuthContextProps | undefined>(undefined
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
-  const [userDetails, setUserDetails] = useState<any | null>(null);
+  const [userDetails, setUserDetails] = useState<UserDetails | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 

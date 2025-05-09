@@ -35,9 +35,12 @@ export function ThemeProvider({
     () => (localStorage.getItem(storageKey) as Theme) || defaultTheme
   );
   const [isDarkMode, setDarkMode] = useState<boolean>(
-    theme === "dark" || 
-    (theme === "system" && 
-     window.matchMedia("(prefers-color-scheme: dark)").matches)
+    () => {
+      if (theme === "system") {
+        return window.matchMedia("(prefers-color-scheme: dark)").matches;
+      }
+      return theme === "dark";
+    }
   );
 
   useEffect(() => {

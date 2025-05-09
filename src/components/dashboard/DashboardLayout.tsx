@@ -1,6 +1,6 @@
 
-import { ReactNode, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { ReactNode, useState, useEffect } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -20,10 +20,11 @@ import {
   Sun, 
   Settings, 
   LogOut,
-  ChevronRight,
   X,
+  UserRoundCog,
 } from "lucide-react";
 import { useTheme } from "@/components/ui/theme-provider";
+import { useAuth } from "@/context/AuthContext";
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -41,12 +42,22 @@ export function DashboardLayout({
   navItems 
 }: DashboardLayoutProps) {
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
-  const { isDarkMode, setDarkMode } = useTheme();
+  const { theme, setTheme, isDarkMode } = useTheme();
   const location = useLocation();
+  const navigate = useNavigate();
+  const { userDetails, signOut } = useAuth();
   
   const toggleDarkMode = () => {
-    setDarkMode(!isDarkMode);
-    localStorage.setItem("theme", isDarkMode ? "light" : "dark");
+    setTheme(isDarkMode ? "light" : "dark");
+  };
+
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      navigate("/");
+    } catch (error) {
+      console.error("Error signing out:", error);
+    }
   };
 
   const getUserTitle = () => {
@@ -60,6 +71,38 @@ export function DashboardLayout({
       default:
         return "Dashboard";
     }
+  };
+
+  const getUserName = () => {
+    if (userDetails) {
+      if (userDetails.first_name && userDetails.last_name) {
+        return `${userDetails.first_name} ${userDetails.last_name}`;
+      } else if (userDetails.first_name) {
+        return userDetails.first_name;
+      }
+    }
+    return userType === "student" ? "Student User" : userType === "company" ? "Company User" : "Admin User";
+  };
+
+  const getUserRole = () => {
+    if (userType === "student") {
+      return userDetails?.specialization ? 
+        userDetails.specialization.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()) + " Student" : 
+        "Student";
+    } else if (userType === "company") {
+      return userDetails?.industry || "Company";
+    }
+    return "Administrator";
+  };
+
+  // Get user initials for avatar
+  const getUserInitials = () => {
+    if (userDetails?.first_name) {
+      const firstInitial = userDetails.first_name.charAt(0).toUpperCase();
+      const lastInitial = userDetails.last_name ? userDetails.last_name.charAt(0).toUpperCase() : "";
+      return firstInitial + lastInitial;
+    }
+    return userType === "student" ? "ST" : userType === "company" ? "CO" : "AD";
   };
 
   return (
@@ -109,35 +152,22 @@ export function DashboardLayout({
                 <Button variant="ghost" className="relative h-9 w-9 rounded-full">
                   <Avatar className="h-9 w-9">
                     <AvatarImage src="/avatar.png" alt="User" />
-                    <AvatarFallback>
-                      {userType === "student" ? "SD" : userType === "company" ? "CO" : "AD"}
-                    </AvatarFallback>
+                    <AvatarFallback>{getUserInitials()}</AvatarFallback>
                   </Avatar>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="glass-card">
                 <div className="flex items-center justify-start gap-2 p-2">
                   <div className="flex flex-col space-y-0.5">
-                    <p className="text-sm font-medium">
-                      {userType === "student" 
-                        ? "Alex Johnson" 
-                        : userType === "company" 
-                          ? "TechCorp Inc." 
-                          : "Admin User"}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {userType === "student" 
-                        ? "Computer Science Student" 
-                        : userType === "company" 
-                          ? "Technology Sector" 
-                          : "System Administrator"}
-                    </p>
+                    <p className="text-sm font-medium">{getUserName()}</p>
+                    <p className="text-xs text-muted-foreground">{getUserRole()}</p>
                   </div>
                 </div>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
-                  <Link to="/profile" className="cursor-pointer">
-                    Profile
+                  <Link to="/student-dashboard/update-profile" className="cursor-pointer">
+                    <UserRoundCog className="mr-2 h-4 w-4" />
+                    Update Profile
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
@@ -147,7 +177,10 @@ export function DashboardLayout({
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem className="cursor-pointer text-destructive focus:text-destructive">
+                <DropdownMenuItem 
+                  className="cursor-pointer text-destructive focus:text-destructive"
+                  onClick={handleSignOut}
+                >
                   <LogOut className="mr-2 h-4 w-4" />
                   Log out
                 </DropdownMenuItem>
