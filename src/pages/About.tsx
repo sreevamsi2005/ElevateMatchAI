@@ -9,28 +9,28 @@ import { GraduationCap, Briefcase, Target, Globe, Heart, Shield } from "lucide-r
 export default function About() {
   const team = [
     {
-      name: "Sarah Johnson",
-      role: "Co-Founder & CEO",
+      name: "Sree Vamsi",
+      role: "Founder & CEO",
       avatar: "/avatar.png",
-      bio: "Former HR Director with 15+ years experience in talent acquisition."
+      bio: "Former HR Director , AI Researcher and former Engineering lead."
     },
     {
-      name: "Michael Chen",
+      name: "XXX",
       role: "Co-Founder & CTO",
       avatar: "/avatar.png",
-      bio: "AI Researcher and former Engineering lead at a major tech company."
+      bio: "-- ."
     },
     {
-      name: "Priya Sharma",
+      name: "XXX",
       role: "Head of Product",
       avatar: "/avatar.png",
-      bio: "Product leader with experience in EdTech and HR tech platforms."
+      bio: "XXX."
     },
     {
-      name: "David Wilson",
+      name: "XXX",
       role: "Head of AI Research",
       avatar: "/avatar.png",
-      bio: "PhD in Machine Learning with focus on NLP and recruiting algorithms."
+      bio: "--"
     }
   ];
 
@@ -91,18 +91,18 @@ export default function About() {
                 <h2 className="text-2xl md:text-3xl font-bold mb-6">Our Story</h2>
                 <div className="space-y-4 text-muted-foreground">
                   <p>
-                    ElevateMatchAI was founded in 2023 by Sarah Johnson and Michael Chen, 
-                    two professionals who experienced firsthand the disconnect between 
+                    ElevateMatchAI was founded in 2025 by Sree vamsi
+                    professional who experienced firsthand the disconnect between 
                     traditional education and employment market demands.
                   </p>
                   <p>
-                    Sarah, with her extensive background in HR, witnessed countless qualified 
+                    Extensive background in HR, witnessed countless qualified 
                     candidates being overlooked due to automated screening tools and rigid 
-                    hiring processes. Michael, with his expertise in AI, recognized the 
+                    hiring processes. Founder with his expertise in AI, recognized the 
                     potential for technology to solve this problem rather than exacerbate it.
                   </p>
                   <p>
-                    Together, they built ElevateMatchAI to create a more equitable, 
+                    Then, he built ElevateMatchAI to create a more equitable, 
                     efficient, and transparent hiring ecosystem that helps students prepare 
                     for their careers and companies find the right talent beyond traditional metrics.
                   </p>
@@ -117,14 +117,14 @@ export default function About() {
                           <span className="text-3xl font-bold">E</span>
                         </div>
                       </div>
-                      <p className="text-xl font-medium">Founded in 2023</p>
-                      <p className="mt-2 text-white/80">San Francisco, CA</p>
+                      <p className="text-xl font-medium">Founded in 2025</p>
+                      <p className="mt-2 text-white/80">India</p>
                     </div>
                   </div>
                 </div>
                 <div className="absolute -bottom-6 -right-6 w-24 h-24 rounded-full bg-background border border-border shadow-lg flex items-center justify-center">
                   <div className="text-center">
-                    <p className="text-xl font-bold text-primary">2023</p>
+                    <p className="text-xl font-bold text-primary">2025</p>
                     <p className="text-xs">Founded</p>
                   </div>
                 </div>
