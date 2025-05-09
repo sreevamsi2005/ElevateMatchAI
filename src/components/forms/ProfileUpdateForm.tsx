@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/select";
 
 export function ProfileUpdateForm() {
-  const { user, userDetails } = useAuth();
+  const { user, userDetails, refreshProfile } = useAuth();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -64,8 +64,10 @@ export function ProfileUpdateForm() {
         description: "Your profile has been updated successfully.",
       });
       
-      // Force a reload to update the context with new user details
-      window.location.reload();
+      // Refresh the profile data in the context
+      if (user?.id) {
+        await refreshProfile(user.id);
+      }
     } catch (error: any) {
       toast({
         variant: "destructive",

@@ -1,4 +1,4 @@
-import { ReactNode, useState, useEffect } from "react";
+import { ReactNode, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -41,13 +41,13 @@ export function DashboardLayout({
   navItems 
 }: DashboardLayoutProps) {
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
-  const { theme, setTheme, isDarkMode } = useTheme();
+  const { theme, setTheme } = useTheme();
   const location = useLocation();
   const navigate = useNavigate();
   const { userDetails, signOut } = useAuth();
   
   const toggleDarkMode = () => {
-    setTheme(isDarkMode ? "light" : "dark");
+    setTheme(theme === "dark" ? "light" : "dark");
   };
 
   const handleSignOut = async () => {

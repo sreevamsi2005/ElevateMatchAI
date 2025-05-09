@@ -1,3 +1,4 @@
+
 import { createContext, useContext, useEffect, useState } from "react";
 import { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
@@ -27,6 +28,7 @@ interface AuthContextProps {
   signInWithEmail: (email: string, password: string) => Promise<any>;
   signInWithGoogle: () => Promise<any>;
   signOut: () => Promise<any>;
+  refreshProfile: (userId: string) => Promise<void>;
 }
 
 export const AuthContext = createContext<AuthContextProps | undefined>(undefined);
@@ -92,6 +94,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } catch (error) {
       console.error("Failed to fetch user profile:", error);
     }
+  };
+
+  const refreshProfile = async (userId: string) => {
+    await fetchUserProfile(userId);
   };
 
   const signUp = async (email: string, password: string, metadata: any) => {
@@ -191,7 +197,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         signUp,
         signInWithEmail,
         signInWithGoogle,
-        signOut
+        signOut,
+        refreshProfile
       }}
     >
       {children}
