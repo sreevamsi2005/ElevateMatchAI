@@ -12,7 +12,7 @@ export default function About() {
       name: "Sree Vamsi",
       role: "Founder & CEO",
       avatar: "/avatar.png",
-      bio: "Former HR Director , AI Researcher and former Engineering lead."
+      bio: ""
     },
     {
       name: "XXX",
@@ -91,12 +91,12 @@ export default function About() {
                 <h2 className="text-2xl md:text-3xl font-bold mb-6">Our Story</h2>
                 <div className="space-y-4 text-muted-foreground">
                   <p>
-                    ElevateMatchAI was founded in 2025 by Sree vamsi
+                    ElevateMatchAI was founded in 2025 by Sree vamsi , 
                     professional who experienced firsthand the disconnect between 
                     traditional education and employment market demands.
                   </p>
                   <p>
-                    Extensive background in HR, witnessed countless qualified 
+                    People with Extensive background in HR, witnessed countless qualified 
                     candidates being overlooked due to automated screening tools and rigid 
                     hiring processes. Founder with his expertise in AI, recognized the 
                     potential for technology to solve this problem rather than exacerbate it.
