@@ -10,6 +10,7 @@ import {
   BarChart,
   Settings,
   FileEdit,
+  Building,
 } from "lucide-react";
 
 export const navItems = [
@@ -47,6 +48,11 @@ export const navItems = [
     title: "Learning Path",
     href: "/student-dashboard/learning",
     icon: BookOpen,
+  },
+  {
+    title: "Off-Campus Calendar",
+    href: "/student-dashboard/off-campus",
+    icon: Building,
   },
   {
     title: "Analytics",

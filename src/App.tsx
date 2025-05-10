@@ -27,6 +27,7 @@ import ResumeBuilder from "./pages/dashboard/ResumeBuilder";
 import Settings from "./pages/dashboard/Settings";
 import CareerRoadmap from "./pages/dashboard/CareerRoadmap";
 import LearningPath from "./pages/dashboard/LearningPath";
+import OffCampusCalendar from "./pages/dashboard/OffCampusCalendar";
 
 const queryClient = new QueryClient();
 
@@ -58,6 +59,7 @@ const App = () => (
               <Route path="/student-dashboard/settings" element={<Settings />} />
               <Route path="/student-dashboard/roadmap" element={<CareerRoadmap />} />
               <Route path="/student-dashboard/learning" element={<LearningPath />} />
+              <Route path="/student-dashboard/off-campus" element={<OffCampusCalendar />} />
               <Route path="/student-dashboard/:section" element={<StudentDashboard />} />
               
               {/* Company Dashboard */}
