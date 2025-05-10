@@ -16,7 +16,7 @@ export default function CareerRoadmap() {
       id: "web-development",
       title: "Web Development",
       icon: Code,
-      quote: ""The web is like a canvas, and code is your paint. Create your masterpiece." — Anonymous",
+      quote: "The web is like a canvas, and code is your paint. Create your masterpiece. — Anonymous",
       color: "bg-blue-50 dark:bg-blue-900/20",
       borderColor: "border-blue-200 dark:border-blue-800",
       steps: [
@@ -36,7 +36,7 @@ export default function CareerRoadmap() {
       id: "data-science",
       title: "Data Science",
       icon: Database,
-      quote: ""In God we trust, all others must bring data." — W. Edwards Deming",
+      quote: "In God we trust, all others must bring data. — W. Edwards Deming",
       color: "bg-purple-50 dark:bg-purple-900/20",
       borderColor: "border-purple-200 dark:border-purple-800",
       steps: [
@@ -56,7 +56,7 @@ export default function CareerRoadmap() {
       id: "machine-learning",
       title: "Machine Learning",
       icon: Layers,
-      quote: ""Machines take me by surprise with great frequency." — Alan Turing",
+      quote: "Machines take me by surprise with great frequency. — Alan Turing",
       color: "bg-green-50 dark:bg-green-900/20", 
       borderColor: "border-green-200 dark:border-green-800",
       steps: [
@@ -76,7 +76,7 @@ export default function CareerRoadmap() {
       id: "cybersecurity",
       title: "Cybersecurity",
       icon: Shield,
-      quote: ""Security is always excessive until it's not enough." — Robbie Sinclair",
+      quote: "Security is always excessive until it's not enough. — Robbie Sinclair",
       color: "bg-red-50 dark:bg-red-900/20",
       borderColor: "border-red-200 dark:border-red-800",
       steps: [
@@ -96,7 +96,7 @@ export default function CareerRoadmap() {
       id: "devops",
       title: "DevOps",
       icon: Server,
-      quote: ""Continuous delivery is like a factory for deploying software." — Jez Humble",
+      quote: "Continuous delivery is like a factory for deploying software. — Jez Humble",
       color: "bg-orange-50 dark:bg-orange-900/20",
       borderColor: "border-orange-200 dark:border-orange-800",
       steps: [
@@ -116,7 +116,7 @@ export default function CareerRoadmap() {
       id: "blockchain",
       title: "Blockchain",
       icon: Database,
-      quote: ""The blockchain does one thing: It replaces third-party trust with mathematical proof that something happened." — Adam Draper",
+      quote: "The blockchain does one thing: It replaces third-party trust with mathematical proof that something happened. — Adam Draper",
       color: "bg-yellow-50 dark:bg-yellow-900/20",
       borderColor: "border-yellow-200 dark:border-yellow-800",
       steps: [
