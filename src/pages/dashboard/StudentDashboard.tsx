@@ -6,6 +6,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
+  CardFooter,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -27,6 +28,8 @@ import {
   CheckCircle2,
   Play,
   Award,
+  Building,
+  Users,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 

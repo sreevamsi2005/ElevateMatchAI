@@ -15,7 +15,7 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { signInWithEmail, signInWithGoogle } = useAuth();
+  const { signInWithEmail, signInWithGoogle, userDetails } = useAuth();
   
   // Check for error parameter in URL
   const errorMessage = searchParams.get("error");
@@ -38,7 +38,12 @@ export default function Login() {
       setIsLoading(true);
       await signInWithEmail(email, password);
       toast.success("Login successful!");
-      navigate("/welcome");
+      
+      // Redirect to the appropriate dashboard based on user type
+      const dashboardPath = userDetails?.user_type === "student" 
+        ? "/student-dashboard" 
+        : "/company-dashboard";
+      navigate(dashboardPath);
     } catch (error) {
       console.error(error);
     } finally {

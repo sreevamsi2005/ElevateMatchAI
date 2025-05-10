@@ -2,9 +2,11 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/context/AuthContext";
 
 export default function AuthCallback() {
   const navigate = useNavigate();
+  const { userDetails } = useAuth();
 
   useEffect(() => {
     const handleAuthCallback = async () => {
@@ -22,7 +24,11 @@ export default function AuthCallback() {
       // Check if we have a session after processing the hash
       if (data.session) {
         console.log("Successfully authenticated with provider");
-        navigate("/welcome"); // Redirect to welcome page after successful authentication
+        // Redirect to the appropriate dashboard based on user type
+        const dashboardPath = userDetails?.user_type === "student" 
+          ? "/student-dashboard" 
+          : "/company-dashboard";
+        navigate(dashboardPath);
       } else {
         // If we still don't have a session, something went wrong
         console.error("No session established after auth callback");
@@ -31,7 +37,7 @@ export default function AuthCallback() {
     };
 
     handleAuthCallback();
-  }, [navigate]);
+  }, [navigate, userDetails]);
 
   return (
     <div className="h-screen flex items-center justify-center">

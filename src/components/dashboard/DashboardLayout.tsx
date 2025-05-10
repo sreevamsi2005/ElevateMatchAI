@@ -1,3 +1,4 @@
+
 import { ReactNode, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
@@ -21,6 +22,7 @@ import {
   LogOut,
   X,
   UserRoundCog,
+  Users,
 } from "lucide-react";
 import { useTheme } from "@/components/ui/theme-provider";
 import { useAuth } from "@/context/AuthContext";
@@ -41,7 +43,8 @@ export function DashboardLayout({
   navItems 
 }: DashboardLayoutProps) {
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
-  const { theme, setTheme, isDarkMode } = useTheme();
+  const { theme, setTheme } = useTheme();
+  const isDarkMode = theme === "dark";
   const location = useLocation();
   const navigate = useNavigate();
   const { userDetails, signOut } = useAuth();
@@ -137,6 +140,17 @@ export function DashboardLayout({
           </div>
 
           <div className="flex items-center space-x-3">
+            {/* Community Button */}
+            <Button 
+              variant="outline" 
+              size="sm"
+              className="hidden md:flex items-center gap-1"
+              onClick={() => navigate("/community")}
+            >
+              <Users className="h-4 w-4 mr-1" />
+              Community
+            </Button>
+            
             <Button variant="ghost" size="icon" className="relative">
               <Bell className="h-5 w-5" />
               <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-primary"></span>
@@ -170,7 +184,7 @@ export function DashboardLayout({
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link to="/settings" className="cursor-pointer">
+                  <Link to="/student-dashboard/settings" className="cursor-pointer">
                     <Settings className="mr-2 h-4 w-4" />
                     Settings
                   </Link>
