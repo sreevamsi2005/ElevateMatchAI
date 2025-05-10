@@ -10,7 +10,8 @@ import { cn } from "@/lib/utils";
 
 export default function LearningPath() {
   const { userDetails } = useAuth();
-  const userType = userDetails?.user_type || "student";
+  // Cast userType to the expected literal type
+  const userType = (userDetails?.user_type || "student") as "student" | "company" | "admin";
 
   const subjects = [
     {

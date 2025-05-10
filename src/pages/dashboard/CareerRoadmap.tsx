@@ -1,4 +1,3 @@
-
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { navItems } from "@/utils/navItems";
 import { useAuth } from "@/context/AuthContext";
@@ -9,7 +8,8 @@ import { ArrowRight, BookOpen, Briefcase, Code, Database, GraduationCap, Layers,
 
 export default function CareerRoadmap() {
   const { userDetails } = useAuth();
-  const userType = userDetails?.user_type || "student";
+  // Cast userType to the expected literal type
+  const userType = (userDetails?.user_type || "student") as "student" | "company" | "admin";
 
   const careerPaths = [
     {
