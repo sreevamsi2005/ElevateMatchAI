@@ -41,7 +41,7 @@ export function DashboardLayout({
   navItems 
 }: DashboardLayoutProps) {
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
-  const { theme, setTheme } = useTheme();
+  const { theme, setTheme, isDarkMode } = useTheme();
   const location = useLocation();
   const navigate = useNavigate();
   const { userDetails, signOut } = useAuth();
