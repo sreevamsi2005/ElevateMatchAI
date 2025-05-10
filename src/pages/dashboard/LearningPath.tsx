@@ -1,17 +1,27 @@
 
+import { useState } from "react";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { navItems } from "@/utils/navItems";
 import { useAuth } from "@/context/AuthContext";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { BookOpen, Code, Computer, Database, GraduationCap, Network } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { 
+  BookOpen, 
+  Code, 
+  Computer, 
+  Database, 
+  GraduationCap, 
+  Network,
+  Shield,
+  Server 
+} from "lucide-react";
 
 export default function LearningPath() {
   const { userDetails } = useAuth();
   // Cast userType to the expected literal type
   const userType = (userDetails?.user_type || "student") as "student" | "company" | "admin";
+  const [activeSubject, setActiveSubject] = useState("operating-systems");
 
   const subjects = [
     {
@@ -308,6 +318,157 @@ ORDER BY AvgSalary DESC;`
         "Be familiar with NoSQL databases and their use cases versus relational databases.",
         "Study isolation levels and concurrency control mechanisms for transaction questions."
       ]
+    },
+    {
+      id: "cybersecurity",
+      title: "Cybersecurity",
+      icon: Shield,
+      color: "bg-red-50 dark:bg-red-900/20",
+      borderColor: "border-red-200 dark:border-red-800",
+      introduction: "Cybersecurity focuses on protecting systems, networks, and programs from digital attacks. These attacks often aim to access, change, or destroy sensitive information; extort money from users; or interrupt normal business processes. Implementing effective security measures is challenging as attackers continually evolve their techniques.",
+      coreTopics: [
+        {
+          title: "Security Fundamentals",
+          content: "CIA triad (Confidentiality, Integrity, Availability), authentication vs. authorization, security controls, and defense in depth strategies."
+        },
+        {
+          title: "Network Security",
+          content: "Firewalls, IDS/IPS, VPNs, network segmentation, DMZ, and secure network architecture design principles."
+        },
+        {
+          title: "Application Security",
+          content: "OWASP Top 10 vulnerabilities, secure coding practices, input validation, output encoding, and secure SDLC integration."
+        },
+        {
+          title: "Cryptography",
+          content: "Symmetric vs. asymmetric encryption, hashing algorithms, digital signatures, PKI, TLS/SSL, and cryptographic attack methods."
+        },
+        {
+          title: "Incident Response",
+          content: "Preparation, identification, containment, eradication, recovery, and lessons learned phases of incident handling."
+        }
+      ],
+      interviews: [
+        "Explain the difference between symmetric and asymmetric encryption.",
+        "What is an XSS attack and how would you prevent it?",
+        "Describe the purpose of a security operations center (SOC).",
+        "How would you respond to a ransomware attack?",
+        "What is the principle of least privilege and why is it important?"
+      ],
+      diagram: {
+        title: "Security Layers",
+        description: "Effective security implements multiple layers: Physical Security → Network Security → Host Security → Application Security → Data Security. Each layer provides different controls with the principle of defense in depth."
+      },
+      codeSnippet: {
+        language: "python",
+        code: `# Example of input validation in Python
+import re
+
+def validate_user_input(input_string):
+    # Check for potential SQL injection patterns
+    sql_patterns = re.compile(r"('|--|;|/\\*|\\*/|xp_)")
+    if sql_patterns.search(input_string):
+        return False, "Potential SQL injection detected"
+    
+    # Validate input format (e.g., alphanumeric only)
+    if not input_string.isalnum():
+        return False, "Input must be alphanumeric"
+        
+    # Validate length
+    if len(input_string) < 5 or len(input_string) > 50:
+        return False, "Input must be between 5-50 characters"
+        
+    return True, "Input is valid"
+
+# Usage
+is_valid, message = validate_user_input("user_input123")`
+      },
+      proTips: [
+        "Think like an attacker when analyzing security vulnerabilities.",
+        "Stay updated on the latest security threats and vulnerabilities (CVEs).",
+        "Practice with CTF (Capture The Flag) challenges to build real-world skills.",
+        "Understand both offensive (red team) and defensive (blue team) security.",
+        "Develop a security mindset that considers security at every stage of development."
+      ]
+    },
+    {
+      id: "cloud-computing",
+      title: "Cloud Computing",
+      icon: Server,
+      color: "bg-sky-50 dark:bg-sky-900/20",
+      borderColor: "border-sky-200 dark:border-sky-800",
+      introduction: "Cloud computing delivers computing services—including servers, storage, databases, networking, software, analytics, and intelligence—over the Internet (the cloud) to offer faster innovation, flexible resources, and economies of scale. Understanding cloud concepts is essential in today's technology landscape.",
+      coreTopics: [
+        {
+          title: "Cloud Service Models",
+          content: "IaaS (Infrastructure as a Service), PaaS (Platform as a Service), SaaS (Software as a Service), and emerging models like FaaS (Function as a Service) or serverless computing."
+        },
+        {
+          title: "Cloud Deployment Models",
+          content: "Public cloud, private cloud, hybrid cloud, and multi-cloud architectures, each with distinct characteristics and use cases."
+        },
+        {
+          title: "Cloud Architecture",
+          content: "Distributed systems design, high availability, fault tolerance, scalability patterns, and disaster recovery in cloud environments."
+        },
+        {
+          title: "Cloud Security",
+          content: "Shared responsibility model, identity and access management (IAM), data encryption, network security, and compliance in the cloud."
+        },
+        {
+          title: "Cloud Economics",
+          content: "CapEx vs OpEx models, pay-as-you-go pricing, cost optimization strategies, and total cost of ownership (TCO) analysis."
+        }
+      ],
+      interviews: [
+        "Compare and contrast the different cloud service models.",
+        "What is the shared responsibility model in cloud security?",
+        "Explain horizontal vs vertical scaling in cloud environments.",
+        "How would you design a highly available application in the cloud?",
+        "Describe strategies for optimizing cloud costs."
+      ],
+      diagram: {
+        title: "Cloud Architecture Components",
+        description: "Modern cloud architecture typically includes: Load Balancers → Web Tier (Stateless) → Application Tier → Database Tier (with replicas) → Storage Services → CDN Edge Locations. Each component is designed for scalability and resilience."
+      },
+      codeSnippet: {
+        language: "yaml",
+        code: `# Infrastructure as Code example using AWS CloudFormation
+AWSTemplateFormatVersion: '2010-09-09'
+Resources:
+  WebServerInstance:
+    Type: 'AWS::EC2::Instance'
+    Properties:
+      InstanceType: t2.micro
+      ImageId: ami-0c55b159cbfafe1f0
+      SecurityGroups:
+        - !Ref WebServerSecurityGroup
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash
+          yum update -y
+          yum install -y httpd
+          systemctl start httpd
+          systemctl enable httpd
+          echo "<html><h1>Hello from CloudFormation</h1></html>" > /var/www/html/index.html
+          
+  WebServerSecurityGroup:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: Enable HTTP access
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0`
+      },
+      proTips: [
+        "Take advantage of managed services to reduce operational overhead.",
+        "Design for failure—assume components will fail and build accordingly.",
+        "Implement infrastructure as code for reproducibility and consistency.",
+        "Monitor cloud resources and set up automated scaling policies.",
+        "Use multiple availability zones to increase reliability."
+      ]
     }
   ];
 
@@ -321,18 +482,28 @@ ORDER BY AvgSalary DESC;`
           </p>
         </div>
 
-        <Tabs defaultValue="operating-systems" className="w-full">
-          <TabsList className="grid grid-cols-2 md:grid-cols-4 mb-6">
+        {/* Subject selector */}
+        <div className="bg-background/80 backdrop-blur-sm sticky top-0 z-10 py-3 -mx-4 px-4">
+          <div className="flex flex-wrap gap-2">
             {subjects.map((subject) => (
-              <TabsTrigger key={subject.id} value={subject.id} className="flex items-center gap-2">
+              <Button
+                key={subject.id}
+                variant={activeSubject === subject.id ? "default" : "outline"}
+                size="sm"
+                onClick={() => setActiveSubject(subject.id)}
+                className="flex items-center gap-2 rounded-full"
+              >
                 <subject.icon className="h-4 w-4" />
                 <span>{subject.title}</span>
-              </TabsTrigger>
+              </Button>
             ))}
-          </TabsList>
+          </div>
+        </div>
 
+        {/* Content for selected subject */}
+        <div className="space-y-8">
           {subjects.map((subject) => (
-            <TabsContent key={subject.id} value={subject.id}>
+            <div key={subject.id} className={activeSubject === subject.id ? "block" : "hidden"}>
               <Card className={`overflow-hidden border ${subject.borderColor}`}>
                 <CardHeader className={`${subject.color}`}>
                   <div className="flex items-start justify-between">
@@ -435,9 +606,9 @@ ORDER BY AvgSalary DESC;`
                   </div>
                 </CardContent>
               </Card>
-            </TabsContent>
+            </div>
           ))}
-        </Tabs>
+        </div>
       </div>
     </DashboardLayout>
   );
