@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
+import { toast } from "sonner";
 
 export default function AuthCallback() {
   const navigate = useNavigate();
@@ -17,6 +18,7 @@ export default function AuthCallback() {
       
       if (error) {
         console.error("Error during auth callback:", error);
+        toast.error("Authentication failed. Please try again.");
         navigate("/login?error=Authentication failed");
         return;
       }
@@ -24,14 +26,22 @@ export default function AuthCallback() {
       // Check if we have a session after processing the hash
       if (data.session) {
         console.log("Successfully authenticated with provider");
+        
+        // Get the user metadata to determine which dashboard to redirect to
+        const { data: userData } = await supabase.auth.getUser();
+        const userType = userData?.user?.user_metadata?.user_type || 'student';
+        
         // Redirect to the appropriate dashboard based on user type
-        const dashboardPath = userDetails?.user_type === "student" 
+        const dashboardPath = userType === "student" 
           ? "/student-dashboard" 
           : "/company-dashboard";
+          
+        toast.success("Successfully logged in!");
         navigate(dashboardPath);
       } else {
         // If we still don't have a session, something went wrong
         console.error("No session established after auth callback");
+        toast.error("Unable to establish session. Please try again.");
         navigate("/login?error=Unable to establish session");
       }
     };

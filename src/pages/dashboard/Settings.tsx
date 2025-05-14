@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
-import { navItems } from "@/utils/navItems";
+import { studentNavItems, companyNavItems } from "@/utils/navItems";
 import { useAuth } from "@/context/AuthContext";
 import { 
   Card, 
@@ -65,6 +65,9 @@ export default function Settings() {
   const handleSavePreferences = () => {
     toast.success("Preferences saved");
   };
+
+  // Choose the correct nav items based on user type
+  const navItems = userType === "student" ? studentNavItems : companyNavItems;
 
   return (
     <DashboardLayout userType={userType as "student" | "company"} navItems={navItems}>

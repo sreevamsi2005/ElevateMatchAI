@@ -28,6 +28,10 @@ import Settings from "./pages/dashboard/Settings";
 import CareerRoadmap from "./pages/dashboard/CareerRoadmap";
 import LearningPath from "./pages/dashboard/LearningPath";
 import OffCampusCalendar from "./pages/dashboard/OffCampusCalendar";
+import MockInterviews from "./pages/dashboard/MockInterviews";
+
+// Company pages
+import CompanyProfile from "./pages/dashboard/companyPages/CompanyProfile";
 
 const queryClient = new QueryClient();
 
@@ -55,6 +59,7 @@ const App = () => (
               {/* Student Dashboard */}
               <Route path="/student-dashboard" element={<StudentDashboard />} />
               <Route path="/student-dashboard/resume" element={<ResumeBuilder />} />
+              <Route path="/student-dashboard/interviews" element={<MockInterviews />} />
               <Route path="/student-dashboard/update-profile" element={<UpdateProfile />} />
               <Route path="/student-dashboard/settings" element={<Settings />} />
               <Route path="/student-dashboard/roadmap" element={<CareerRoadmap />} />
@@ -64,6 +69,7 @@ const App = () => (
               
               {/* Company Dashboard */}
               <Route path="/company-dashboard" element={<CompanyDashboard />} />
+              <Route path="/company-dashboard/profile" element={<CompanyProfile />} />
               <Route path="/company-dashboard/settings" element={<Settings />} />
               <Route path="/company-dashboard/:section" element={<CompanyDashboard />} />
               

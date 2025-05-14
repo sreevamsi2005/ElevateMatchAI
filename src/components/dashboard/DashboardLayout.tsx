@@ -178,13 +178,13 @@ export function DashboardLayout({
                 </div>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
-                  <Link to="/student-dashboard/update-profile" className="cursor-pointer">
+                  <Link to={`/${userType}-dashboard/update-profile`} className="cursor-pointer">
                     <UserRoundCog className="mr-2 h-4 w-4" />
                     Update Profile
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link to="/student-dashboard/settings" className="cursor-pointer">
+                  <Link to={`/${userType}-dashboard/settings`} className="cursor-pointer">
                     <Settings className="mr-2 h-4 w-4" />
                     Settings
                   </Link>

@@ -1,4 +1,3 @@
-
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { navItems } from "@/utils/navItems";
 import { useAuth } from "@/context/AuthContext";
@@ -17,7 +16,9 @@ import {
   Shield,
   Computer,
   Smartphone,
-  Gamepad
+  Gamepad,
+  Brain,
+  Globe
 } from "lucide-react";
 import { useState } from "react";
 

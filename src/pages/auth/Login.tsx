@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,6 +8,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { AuthLayout } from "@/components/auth/AuthLayout";
 import { toast } from "sonner";
 import { useAuth } from "@/context/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 
 export default function Login() {
   const [isLoading, setIsLoading] = useState(false);
@@ -36,14 +37,22 @@ export default function Login() {
 
     try {
       setIsLoading(true);
-      await signInWithEmail(email, password);
-      toast.success("Login successful!");
+      const { data } = await signInWithEmail(email, password);
       
-      // Redirect to the appropriate dashboard based on user type
-      const dashboardPath = userDetails?.user_type === "student" 
-        ? "/student-dashboard" 
-        : "/company-dashboard";
-      navigate(dashboardPath);
+      if (data?.user) {
+        toast.success("Login successful!");
+        
+        // Get user type from user metadata
+        const { data: userData } = await supabase.auth.getUser();
+        const userType = userData?.user?.user_metadata?.user_type || 'student';
+        
+        // Redirect based on user type
+        const dashboardPath = userType === "student" 
+          ? "/student-dashboard" 
+          : "/company-dashboard";
+        
+        navigate(dashboardPath);
+      }
     } catch (error) {
       console.error(error);
     } finally {

@@ -11,9 +11,16 @@ import {
   Settings,
   FileEdit,
   Building,
+  Users,
+  LineChart,
+  Calendar,
+  Database,
+  PanelLeft,
+  FileSearch,
+  BellRing,
 } from "lucide-react";
 
-export const navItems = [
+export const studentNavItems = [
   {
     title: "Overview",
     href: "/student-dashboard",
@@ -70,3 +77,59 @@ export const navItems = [
     icon: Settings,
   },
 ];
+
+export const companyNavItems = [
+  {
+    title: "Overview",
+    href: "/company-dashboard",
+    icon: Home,
+  },
+  {
+    title: "Job Postings",
+    href: "/company-dashboard/jobs",
+    icon: Briefcase,
+  },
+  {
+    title: "Candidate Database",
+    href: "/company-dashboard/candidates",
+    icon: Database,
+  },
+  {
+    title: "Applications",
+    href: "/company-dashboard/applications",
+    icon: FileSearch,
+  },
+  {
+    title: "Interviews",
+    href: "/company-dashboard/interviews",
+    icon: Calendar,
+  },
+  {
+    title: "Analytics",
+    href: "/company-dashboard/analytics",
+    icon: LineChart,
+  },
+  {
+    title: "Talent Pool",
+    href: "/company-dashboard/talent",
+    icon: Users,
+  },
+  {
+    title: "Notifications",
+    href: "/company-dashboard/notifications",
+    icon: BellRing,
+  },
+  {
+    title: "Company Profile",
+    href: "/company-dashboard/profile",
+    icon: FileEdit,
+  },
+  {
+    title: "Settings",
+    href: "/company-dashboard/settings",
+    icon: Settings,
+  },
+];
+
+// For backward compatibility
+export const navItems = studentNavItems;

@@ -8,6 +8,8 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { AuthLayout } from "@/components/auth/AuthLayout";
 import { toast } from "sonner";
 import { useAuth } from "@/context/AuthContext";
+import { AnimatePresence, motion } from "framer-motion";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 export default function Signup() {
   const navigate = useNavigate();
@@ -16,6 +18,7 @@ export default function Signup() {
     fullName: "",
     email: "",
     password: "",
+    companyName: "",
     accountType: "student" // Default to student
   });
   const { signUp, signInWithGoogle } = useAuth();
@@ -36,6 +39,11 @@ export default function Signup() {
       return;
     }
 
+    if (formData.accountType === "company" && !formData.companyName) {
+      toast.error("Please enter your company name");
+      return;
+    }
+
     if (formData.password.length < 8) {
       toast.error("Password must be at least 8 characters");
       return;
@@ -53,7 +61,8 @@ export default function Signup() {
       const metadata = {
         user_type: formData.accountType,
         first_name: firstName,
-        last_name: lastName
+        last_name: lastName,
+        company_name: formData.accountType === "company" ? formData.companyName : ""
       };
       
       await signUp(formData.email, formData.password, metadata);
@@ -104,46 +113,121 @@ export default function Signup() {
           </RadioGroup>
         </div>
         
-        <div className="space-y-2">
-          <Label htmlFor="fullName">Full name</Label>
-          <Input
-            id="fullName"
-            placeholder="John Doe"
-            value={formData.fullName}
-            onChange={handleChange}
-            disabled={isLoading}
-            required
-          />
-        </div>
-        
-        <div className="space-y-2">
-          <Label htmlFor="email">Email</Label>
-          <Input
-            id="email"
-            type="email"
-            placeholder="name@example.com"
-            value={formData.email}
-            onChange={handleChange}
-            disabled={isLoading}
-            required
-          />
-        </div>
-        
-        <div className="space-y-2">
-          <Label htmlFor="password">Password</Label>
-          <Input
-            id="password"
-            type="password"
-            placeholder="••••••••"
-            value={formData.password}
-            onChange={handleChange}
-            disabled={isLoading}
-            required
-          />
-          <p className="text-xs text-muted-foreground">
-            Password must be at least 8 characters and include a number and a special character.
-          </p>
-        </div>
+        <AnimatePresence mode="wait">
+          {formData.accountType === "student" ? (
+            <motion.div
+              key="student-form"
+              initial={{ x: -20, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              exit={{ x: -20, opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              className="space-y-4"
+            >
+              <div className="space-y-2">
+                <Label htmlFor="fullName">Full name</Label>
+                <Input
+                  id="fullName"
+                  placeholder="John Doe"
+                  value={formData.fullName}
+                  onChange={handleChange}
+                  disabled={isLoading}
+                  required
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="name@example.com"
+                  value={formData.email}
+                  onChange={handleChange}
+                  disabled={isLoading}
+                  required
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="password">Password</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="••••••••"
+                  value={formData.password}
+                  onChange={handleChange}
+                  disabled={isLoading}
+                  required
+                />
+                <p className="text-xs text-muted-foreground">
+                  Password must be at least 8 characters and include a number and a special character.
+                </p>
+              </div>
+            </motion.div>
+          ) : (
+            <motion.div
+              key="company-form"
+              initial={{ x: 20, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              exit={{ x: 20, opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              className="space-y-4"
+            >
+              <div className="space-y-2">
+                <Label htmlFor="companyName">Company name</Label>
+                <Input
+                  id="companyName"
+                  placeholder="Acme Corporation"
+                  value={formData.companyName}
+                  onChange={handleChange}
+                  disabled={isLoading}
+                  required
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="fullName">Contact person's name</Label>
+                <Input
+                  id="fullName"
+                  placeholder="John Doe"
+                  value={formData.fullName}
+                  onChange={handleChange}
+                  disabled={isLoading}
+                  required
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="email">Business email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="name@company.com"
+                  value={formData.email}
+                  onChange={handleChange}
+                  disabled={isLoading}
+                  required
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="password">Password</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="••••••••"
+                  value={formData.password}
+                  onChange={handleChange}
+                  disabled={isLoading}
+                  required
+                />
+                <p className="text-xs text-muted-foreground">
+                  Password must be at least 8 characters and include a number and a special character.
+                </p>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
         
         <Button type="submit" className="w-full mt-4 btn-gradient" disabled={isLoading}>
           {isLoading ? "Creating account..." : "Create account"}
