@@ -326,7 +326,7 @@ export default function CareerRoadmap() {
     {
       id: "mobile-development",
       title: "Mobile App Development",
-      icon: Mobile,
+      icon: Smartphone,
       color: "bg-emerald-50 dark:bg-emerald-900/20",
       borderColor: "border-emerald-200 dark:border-emerald-800",
       quote: "The best apps feel like magic. — Anonymous",
