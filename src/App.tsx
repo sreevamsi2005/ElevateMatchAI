@@ -18,6 +18,7 @@ import Contact from "./pages/Contact";
 import Login from "./pages/auth/Login";
 import Signup from "./pages/auth/Signup";
 import AuthCallback from "./pages/auth/callback";
+import ResetPassword from "./pages/auth/ResetPassword";
 
 // Dashboard pages
 import StudentDashboard from "./pages/dashboard/StudentDashboard";
@@ -48,6 +49,7 @@ const App = () => (
               <Route path="/" element={<Index />} />
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<Signup />} />
+              <Route path="/reset-password" element={<ResetPassword />} />
               <Route path="/community" element={<Community />} />
               <Route path="/about" element={<About />} />
               <Route path="/contact" element={<Contact />} />

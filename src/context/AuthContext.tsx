@@ -29,6 +29,8 @@ interface AuthContextProps {
   signInWithGoogle: () => Promise<any>;
   signOut: () => Promise<any>;
   refreshProfile: (userId: string) => Promise<void>;
+  resetPassword: (email: string, redirectUrl?: string) => Promise<any>;
+  updatePassword: (newPassword: string) => Promise<any>;
 }
 
 export const AuthContext = createContext<AuthContextProps | undefined>(undefined);
@@ -116,14 +118,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         throw error;
       }
 
-      return data;
+      return { data, error: null };
     } catch (error: any) {
       toast({
         title: "Sign up failed",
         description: error.message,
         variant: "destructive"
       });
-      throw error;
+      return { data: null, error };
     }
   };
 
@@ -138,14 +140,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         throw error;
       }
 
-      return data;
+      return { data, error: null };
     } catch (error: any) {
       toast({
         title: "Sign in failed",
         description: error.message,
         variant: "destructive"
       });
-      throw error;
+      return { data: null, error };
     }
   };
 
@@ -166,14 +168,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         throw error;
       }
 
-      return data;
+      return { data, error: null };
     } catch (error: any) {
       toast({
         title: "Google sign in failed",
         description: error.message,
         variant: "destructive"
       });
-      throw error;
+      return { data: null, error };
     }
   };
 
@@ -183,13 +185,56 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (error) {
         throw error;
       }
+      return { error: null };
     } catch (error: any) {
       toast({
         title: "Sign out failed",
         description: error.message,
         variant: "destructive"
       });
-      throw error;
+      return { error };
+    }
+  };
+
+  const resetPassword = async (email: string, redirectUrl?: string) => {
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: redirectUrl || `${window.location.origin}/reset-password`,
+      });
+
+      if (error) {
+        throw error;
+      }
+      
+      return { error: null };
+    } catch (error: any) {
+      toast({
+        title: "Password reset failed",
+        description: error.message,
+        variant: "destructive"
+      });
+      return { error };
+    }
+  };
+
+  const updatePassword = async (newPassword: string) => {
+    try {
+      const { error } = await supabase.auth.updateUser({
+        password: newPassword
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      return { error: null };
+    } catch (error: any) {
+      toast({
+        title: "Password update failed",
+        description: error.message,
+        variant: "destructive"
+      });
+      return { error };
     }
   };
 
@@ -204,7 +249,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         signInWithEmail,
         signInWithGoogle,
         signOut,
-        refreshProfile
+        refreshProfile,
+        resetPassword,
+        updatePassword
       }}
     >
       {children}

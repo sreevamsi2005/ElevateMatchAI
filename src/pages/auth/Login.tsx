@@ -9,11 +9,13 @@ import { AuthLayout } from "@/components/auth/AuthLayout";
 import { toast } from "sonner";
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
+import { Eye, EyeOff } from "lucide-react";
 
 export default function Login() {
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { signInWithEmail, signInWithGoogle, userDetails } = useAuth();
@@ -37,7 +39,12 @@ export default function Login() {
 
     try {
       setIsLoading(true);
-      const { data } = await signInWithEmail(email, password);
+      const { data, error } = await signInWithEmail(email, password);
+      
+      if (error) {
+        toast.error(error.message);
+        return;
+      }
       
       if (data?.user) {
         toast.success("Login successful!");
@@ -53,8 +60,9 @@ export default function Login() {
         
         navigate(dashboardPath);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
+      toast.error(error.message || "Failed to sign in");
     } finally {
       setIsLoading(false);
     }
@@ -64,8 +72,39 @@ export default function Login() {
     try {
       setIsLoading(true);
       await signInWithGoogle();
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
+      toast.error(error.message || "Failed to sign in with Google");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
+  const handleForgotPassword = async () => {
+    if (!email) {
+      toast.error("Please enter your email address");
+      return;
+    }
+    
+    try {
+      setIsLoading(true);
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+      
+      if (error) {
+        toast.error(error.message);
+        return;
+      }
+      
+      toast.success("Password reset link sent to your email");
+    } catch (error: any) {
+      console.error(error);
+      toast.error(error.message || "Failed to send password reset email");
     } finally {
       setIsLoading(false);
     }
@@ -93,22 +132,38 @@ export default function Login() {
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <Label htmlFor="password">Password</Label>
-            <Link
-              to="/forgot-password"
+            <button
+              type="button"
+              onClick={handleForgotPassword}
               className="text-sm font-medium text-primary hover:underline"
             >
               Forgot password?
-            </Link>
+            </button>
           </div>
-          <Input
-            id="password"
-            type="password"
-            placeholder="••••••••"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            disabled={isLoading}
-            required
-          />
+          <div className="relative">
+            <Input
+              id="password"
+              type={showPassword ? "text" : "password"}
+              placeholder="••••••••"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              disabled={isLoading}
+              required
+              className="pr-10"
+            />
+            <button
+              type="button"
+              onClick={togglePasswordVisibility}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+              tabIndex={-1}
+            >
+              {showPassword ? (
+                <EyeOff className="h-5 w-5" />
+              ) : (
+                <Eye className="h-5 w-5" />
+              )}
+            </button>
+          </div>
         </div>
         
         <div className="flex items-center space-x-2">
