@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -43,11 +42,10 @@ export default function AdminDashboard() {
   }
 
   return (
-    <>
+    <div>
       <Helmet>
         <title>Admin Dashboard | ElevateMatchAI</title>
       </Helmet>
-      
       <DashboardLayout userType="admin" navItems={adminNavItems}>
         <div className="space-y-6">
           <div className="flex justify-between">
@@ -232,6 +230,6 @@ export default function AdminDashboard() {
           </Tabs>
         </div>
       </DashboardLayout>
-    </>
+    </div>
   );
 }

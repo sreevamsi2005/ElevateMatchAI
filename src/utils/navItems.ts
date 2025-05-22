@@ -18,6 +18,9 @@ import {
   FileSearch,
   BellRing,
   FileCheck,
+  Shield,
+  Mail,
+  UserRoundCog,
 } from "lucide-react";
 
 export const studentNavItems = [
