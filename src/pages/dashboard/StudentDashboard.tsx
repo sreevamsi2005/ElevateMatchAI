@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
+import { ChatBot } from "@/components/dashboard/ChatBot";
 import { useAuth } from "@/context/AuthContext";
 import { navItems } from "@/utils/navItems";
 import {
@@ -244,6 +245,9 @@ export default function StudentDashboard() {
           </CardContent>
         </Card>
       </div>
+      
+      {/* ChatBot Component */}
+      <ChatBot />
     </DashboardLayout>
   );
 }
