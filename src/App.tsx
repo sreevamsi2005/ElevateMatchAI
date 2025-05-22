@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -30,6 +29,7 @@ import CareerRoadmap from "./pages/dashboard/CareerRoadmap";
 import LearningPath from "./pages/dashboard/LearningPath";
 import OffCampusCalendar from "./pages/dashboard/OffCampusCalendar";
 import MockInterviews from "./pages/dashboard/MockInterviews";
+import ATSScore from "./pages/dashboard/ATSScore";
 
 // Company pages
 import CompanyProfile from "./pages/dashboard/companyPages/CompanyProfile";
@@ -67,6 +67,7 @@ const App = () => (
               <Route path="/student-dashboard/roadmap" element={<CareerRoadmap />} />
               <Route path="/student-dashboard/learning" element={<LearningPath />} />
               <Route path="/student-dashboard/off-campus" element={<OffCampusCalendar />} />
+              <Route path="/student-dashboard/ats-score" element={<ATSScore />} />
               <Route path="/student-dashboard/:section" element={<StudentDashboard />} />
               
               {/* Company Dashboard */}

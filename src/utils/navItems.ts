@@ -1,4 +1,3 @@
-
 import {
   Home,
   FileText,
@@ -18,6 +17,7 @@ import {
   PanelLeft,
   FileSearch,
   BellRing,
+  FileCheck,
 } from "lucide-react";
 
 export const studentNavItems = [
@@ -30,6 +30,11 @@ export const studentNavItems = [
     title: "Resume Builder",
     href: "/student-dashboard/resume",
     icon: FileText,
+  },
+  {
+    title: "ATS Score",
+    href: "/student-dashboard/ats-score",
+    icon: FileCheck,
   },
   {
     title: "Mock Interviews",
