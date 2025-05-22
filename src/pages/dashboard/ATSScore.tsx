@@ -66,11 +66,18 @@ export default function ATSScore() {
   };
 
   const extractTextFromFile = async (file: File): Promise<string> => {
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.onload = (e) => {
-        const text = e.target?.result as string;
-        resolve(text);
+        try {
+          const text = e.target?.result as string;
+          resolve(text);
+        } catch (error) {
+          reject(new Error('Failed to read file'));
+        }
+      };
+      reader.onerror = () => {
+        reject(new Error('Failed to read file'));
       };
       reader.readAsText(file);
     });
@@ -425,73 +432,6 @@ export default function ATSScore() {
                     <span>50%</span>
                     <span>75%</span>
                     <span>100%</span>
-                  </div>
-                </div>
-
-                {/* Score Breakdown */}
-                <div className="grid gap-4 md:grid-cols-2">
-                  <div className="space-y-2 p-4 bg-blue-50 rounded-lg">
-                    <h4 className="font-medium text-blue-700">Formatting Score</h4>
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm">Section Structure</span>
-                        <span className="text-sm font-medium">30%</span>
-                      </div>
-                      <Progress value={30} className="h-2 bg-blue-100" />
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm">Formatting Elements</span>
-                        <span className="text-sm font-medium">30%</span>
-                      </div>
-                      <Progress value={30} className="h-2 bg-blue-100" />
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm">Length & Structure</span>
-                        <span className="text-sm font-medium">20%</span>
-                      </div>
-                      <Progress value={20} className="h-2 bg-blue-100" />
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm">Contact Information</span>
-                        <span className="text-sm font-medium">20%</span>
-                      </div>
-                      <Progress value={20} className="h-2 bg-blue-100" />
-                    </div>
-                  </div>
-
-                  <div className="space-y-2 p-4 bg-green-50 rounded-lg">
-                    <h4 className="font-medium text-green-700">Content Score</h4>
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm">Content Quality</span>
-                        <span className="text-sm font-medium">40%</span>
-                      </div>
-                      <Progress value={40} className="h-2 bg-green-100" />
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm">Section Completeness</span>
-                        <span className="text-sm font-medium">30%</span>
-                      </div>
-                      <Progress value={30} className="h-2 bg-green-100" />
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm">Achievement Quantification</span>
-                        <span className="text-sm font-medium">30%</span>
-                      </div>
-                      <Progress value={30} className="h-2 bg-green-100" />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Score Summary */}
-                <div className="p-4 bg-gray-50 rounded-lg">
-                  <h4 className="font-medium text-gray-700 mb-2">Score Summary</h4>
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm">Formatting (40% of total)</span>
-                      <span className="text-sm font-medium">{Math.round(analysisResult.score * 0.4)}%</span>
-                    </div>
-                    <Progress value={analysisResult.score * 0.4} className="h-2 bg-gray-200" />
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm">Content (60% of total)</span>
-                      <span className="text-sm font-medium">{Math.round(analysisResult.score * 0.6)}%</span>
-                    </div>
-                    <Progress value={analysisResult.score * 0.6} className="h-2 bg-gray-200" />
                   </div>
                 </div>
               </div>
