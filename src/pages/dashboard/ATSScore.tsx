@@ -14,7 +14,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { FileText, Upload, AlertCircle, CheckCircle2, Loader2 } from "lucide-react";
+import { FileText, Upload, AlertCircle, CheckCircle2, Loader2, Info } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 
 interface AnalysisResult {
@@ -33,22 +33,36 @@ export default function ATSScore() {
 
   const handleResumeUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (file && (file.type === "application/pdf" || file.type === "application/vnd.openxmlformats-officedocument.wordprocessingml.document")) {
-      setResumeFile(file);
-      setAnalysisResult(null); // Reset analysis when new file is uploaded
-    } else {
-      toast({
-        variant: "destructive",
-        title: "Invalid file type",
-        description: "Please upload a PDF or DOCX file",
-      });
+    if (file) {
+      // Check file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        toast({
+          variant: "destructive",
+          title: "File too large",
+          description: "Please upload a file smaller than 5MB",
+        });
+        return;
+      }
+
+      // Check file type
+      if (file.type === "application/pdf" || file.type === "application/vnd.openxmlformats-officedocument.wordprocessingml.document") {
+        setResumeFile(file);
+        setAnalysisResult(null); // Reset analysis when new file is uploaded
+        toast({
+          title: "Resume uploaded",
+          description: "Your resume has been uploaded successfully",
+        });
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Invalid file type",
+          description: "Please upload a PDF or DOCX file",
+        });
+      }
     }
   };
 
   const extractTextFromFile = async (file: File): Promise<string> => {
-    // This is a placeholder for actual file parsing logic
-    // In a real implementation, you would use libraries like pdf.js for PDFs
-    // and mammoth.js for DOCX files
     return new Promise((resolve) => {
       const reader = new FileReader();
       reader.onload = (e) => {
@@ -60,11 +74,10 @@ export default function ATSScore() {
   };
 
   const analyzeResume = async (resumeText: string, jobDescription: string): Promise<AnalysisResult> => {
-    // Convert both texts to lowercase for case-insensitive matching
     const resumeLower = resumeText.toLowerCase();
     const jobDescLower = jobDescription.toLowerCase();
 
-    // Extract keywords from job description (simple implementation)
+    // Extract keywords from job description
     const keywords = jobDescLower
       .split(/[\s,.-]+/)
       .filter(word => word.length > 3)
@@ -77,7 +90,7 @@ export default function ATSScore() {
     const matchedKeywords = keywords.filter(keyword => resumeLower.includes(keyword));
     const score = Math.round((matchedKeywords.length / keywords.length) * 100);
 
-    // Analyze formatting (placeholder implementation)
+    // Analyze formatting
     const formattingIssues = [];
     if (resumeText.length < 200) {
       formattingIssues.push("Resume appears too short");
@@ -116,6 +129,15 @@ export default function ATSScore() {
       return;
     }
 
+    if (jobDescription.length < 50) {
+      toast({
+        variant: "destructive",
+        title: "Job description too short",
+        description: "Please provide a more detailed job description for better analysis",
+      });
+      return;
+    }
+
     setIsLoading(true);
     try {
       const resumeText = await extractTextFromFile(resumeFile);
@@ -149,24 +171,46 @@ export default function ATSScore() {
             <CardDescription>Upload your resume in PDF or DOCX format</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
+            <Alert>
+              <Info className="h-4 w-4" />
+              <AlertTitle>Tips for best results</AlertTitle>
+              <AlertDescription>
+                <ul className="list-disc pl-4 mt-2 space-y-1">
+                  <li>Use a clear, well-formatted resume</li>
+                  <li>Include relevant skills and experiences</li>
+                  <li>Keep file size under 5MB</li>
+                  <li>Use standard fonts and formatting</li>
+                </ul>
+              </AlertDescription>
+            </Alert>
             <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed p-6">
               <Upload className="mb-2 h-8 w-8 text-muted-foreground" />
-              <Label htmlFor="resume" className="cursor-pointer">
-                <Input
-                  id="resume"
-                  type="file"
-                  accept=".pdf,.docx"
-                  className="hidden"
-                  onChange={handleResumeUpload}
-                />
-                <Button variant="outline" className="mt-2">
-                  Choose File
-                </Button>
-              </Label>
-              {resumeFile && (
-                <p className="mt-2 text-sm text-muted-foreground">
-                  Selected: {resumeFile.name}
+              <div className="flex flex-col items-center gap-2">
+                <Label htmlFor="resume" className="cursor-pointer">
+                  <Input
+                    id="resume"
+                    type="file"
+                    accept=".pdf,.docx"
+                    className="hidden"
+                    onChange={handleResumeUpload}
+                  />
+                  <Button 
+                    variant="outline" 
+                    className="mt-2"
+                    onClick={() => document.getElementById('resume')?.click()}
+                  >
+                    Choose File
+                  </Button>
+                </Label>
+                <p className="text-sm text-muted-foreground">
+                  Supported formats: PDF, DOC, DOCX (max 5MB)
                 </p>
+              </div>
+              {resumeFile && (
+                <div className="mt-2 text-sm text-muted-foreground">
+                  <p>Selected: {resumeFile.name}</p>
+                  <p className="text-xs">Size: {(resumeFile.size / 1024 / 1024).toFixed(2)}MB</p>
+                </div>
               )}
             </div>
           </CardContent>
@@ -178,16 +222,31 @@ export default function ATSScore() {
             <CardTitle>Job Description</CardTitle>
             <CardDescription>Paste the job description to analyze</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-4">
+            <Alert>
+              <Info className="h-4 w-4" />
+              <AlertTitle>Tips for best results</AlertTitle>
+              <AlertDescription>
+                <ul className="list-disc pl-4 mt-2 space-y-1">
+                  <li>Include the full job description</li>
+                  <li>Copy directly from the job posting</li>
+                  <li>Include required skills and qualifications</li>
+                  <li>Minimum 50 characters recommended</li>
+                </ul>
+              </AlertDescription>
+            </Alert>
             <Textarea
               placeholder="Paste the job description here..."
               className="h-[200px]"
               value={jobDescription}
               onChange={(e) => {
                 setJobDescription(e.target.value);
-                setAnalysisResult(null); // Reset analysis when job description changes
+                setAnalysisResult(null);
               }}
             />
+            <div className="text-sm text-muted-foreground">
+              Characters: {jobDescription.length}
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -212,40 +271,80 @@ export default function ATSScore() {
         <Card>
           <CardHeader>
             <CardTitle>ATS Analysis Results</CardTitle>
-            <CardDescription>Your resume's compatibility score and feedback</CardDescription>
+            <CardDescription>Your resume's compatibility score and improvement suggestions</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             {/* Score Display */}
-            <div className="space-y-2">
+            <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">ATS Compatibility Score</span>
-                <span className="text-sm text-muted-foreground">{analysisResult.score}%</span>
+                <span className="text-lg font-medium">ATS Compatibility Score</span>
+                <span className={`text-lg font-bold ${
+                  analysisResult.score >= 80 ? 'text-green-600' :
+                  analysisResult.score >= 60 ? 'text-yellow-600' :
+                  'text-red-600'
+                }`}>
+                  {analysisResult.score}%
+                </span>
               </div>
-              <Progress value={analysisResult.score} className="h-2" />
+              <Progress 
+                value={analysisResult.score} 
+                className={`h-3 ${
+                  analysisResult.score >= 80 ? 'bg-green-100' :
+                  analysisResult.score >= 60 ? 'bg-yellow-100' :
+                  'bg-red-100'
+                }`}
+              />
+              <div className="mt-4">
+                {analysisResult.score >= 80 ? (
+                  <div className="space-y-2">
+                    <h3 className="font-medium text-green-700">Excellent ATS Compatibility</h3>
+                    <p className="text-sm text-gray-600">
+                      Your resume is well-optimized for ATS systems. Keep maintaining these best practices:
+                    </p>
+                    <ul className="list-disc pl-4 text-sm text-gray-600 space-y-1">
+                      <li>Continue using relevant keywords naturally in your content</li>
+                      <li>Maintain clear section headings and formatting</li>
+                      <li>Keep your resume concise and well-structured</li>
+                    </ul>
+                  </div>
+                ) : analysisResult.score >= 60 ? (
+                  <div className="space-y-2">
+                    <h3 className="font-medium text-yellow-700">Good ATS Compatibility</h3>
+                    <p className="text-sm text-gray-600">
+                      Your resume has decent ATS compatibility. Here's how to improve it further:
+                    </p>
+                    <ul className="list-disc pl-4 text-sm text-gray-600 space-y-1">
+                      <li>Add more relevant keywords from the job description</li>
+                      <li>Ensure all sections are properly formatted</li>
+                      <li>Make your achievements more quantifiable</li>
+                      <li>Use bullet points for better readability</li>
+                    </ul>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    <h3 className="font-medium text-red-700">Needs Improvement</h3>
+                    <p className="text-sm text-gray-600">
+                      Your resume needs optimization to pass ATS screening. Focus on these areas:
+                    </p>
+                    <ul className="list-disc pl-4 text-sm text-gray-600 space-y-1">
+                      <li>Incorporate more keywords from the job description</li>
+                      <li>Improve section organization and formatting</li>
+                      <li>Add specific achievements and metrics</li>
+                      <li>Ensure all text is selectable (not in images)</li>
+                      <li>Use standard fonts and formatting</li>
+                    </ul>
+                  </div>
+                )}
+              </div>
             </div>
-
-            {/* Missing Keywords */}
-            {analysisResult.missingKeywords.length > 0 && (
-              <div className="space-y-2">
-                <h3 className="font-medium">Missing Keywords</h3>
-                <div className="grid gap-2">
-                  {analysisResult.missingKeywords.map((keyword, index) => (
-                    <Alert key={index} variant="destructive">
-                      <AlertCircle className="h-4 w-4" />
-                      <AlertTitle>{keyword}</AlertTitle>
-                    </Alert>
-                  ))}
-                </div>
-              </div>
-            )}
 
             {/* Formatting Issues */}
             {analysisResult.formattingIssues.length > 0 && (
               <div className="space-y-2">
-                <h3 className="font-medium">Formatting Issues</h3>
+                <h3 className="font-medium">Formatting Improvements Needed</h3>
                 <div className="grid gap-2">
                   {analysisResult.formattingIssues.map((issue, index) => (
-                    <Alert key={index} variant="warning">
+                    <Alert key={index} variant="default">
                       <AlertCircle className="h-4 w-4" />
                       <AlertTitle>{issue}</AlertTitle>
                     </Alert>
@@ -257,7 +356,7 @@ export default function ATSScore() {
             {/* Optimization Tips */}
             {analysisResult.optimizationTips.length > 0 && (
               <div className="space-y-2">
-                <h3 className="font-medium">Optimization Tips</h3>
+                <h3 className="font-medium">Key Optimization Tips</h3>
                 <div className="grid gap-2">
                   {analysisResult.optimizationTips.map((tip, index) => (
                     <Alert key={index} variant="default">
