@@ -84,16 +84,17 @@ export default function ATSScore() {
       skills: resumeLower.includes('skills') ? 1 : 0,
       experience: resumeLower.includes('experience') || resumeLower.includes('work') ? 1 : 0,
       education: resumeLower.includes('education') || resumeLower.includes('academic') ? 1 : 0,
-      projects: resumeLower.includes('projects') || resumeLower.includes('portfolio') ? 1 : 0
+      projects: resumeLower.includes('projects') || resumeLower.includes('portfolio') ? 1 : 0,
+      summary: resumeLower.includes('summary') || resumeLower.includes('objective') ? 1 : 0
     };
 
-    // Calculate formatting score
+    // Calculate formatting score (40% of total)
     const formattingScore = calculateFormattingScore(resumeText);
 
-    // Calculate content score
+    // Calculate content score (60% of total)
     const contentScore = calculateContentScore(resumeText, sections);
 
-    // Calculate total score
+    // Calculate total score with weighted components
     const totalScore = Math.round((formattingScore * 0.4) + (contentScore * 0.6));
 
     // Analyze job description match if provided
@@ -119,44 +120,86 @@ export default function ATSScore() {
   };
 
   const calculateFormattingScore = (resumeText: string): number => {
-    let score = 100;
+    let score = 0;
+    const resumeLower = resumeText.toLowerCase();
     
-    // Check for proper section separation
-    const sections = ['skills', 'experience', 'education', 'projects'];
-    const hasSections = sections.some(section => resumeText.toLowerCase().includes(section));
-    if (!hasSections) score -= 20;
+    // Check for proper section separation (30 points)
+    const essentialSections = ['skills', 'experience', 'education', 'projects', 'summary', 'objective'];
+    const foundSections = essentialSections.filter(section => resumeLower.includes(section));
+    score += (foundSections.length / essentialSections.length) * 30;
 
-    // Check for bullet points
-    if (!resumeText.includes('•') && !resumeText.includes('-')) score -= 15;
+    // Check for proper formatting elements (30 points)
+    const formattingChecks = {
+      bulletPoints: resumeText.includes('•') || resumeText.includes('-') || resumeText.includes('*'),
+      properSpacing: !resumeText.includes('  ') && !resumeText.includes('\t'),
+      properLineBreaks: resumeText.split('\n').length >= 10,
+      consistentFormatting: !resumeText.includes('font') && !resumeText.includes('style'),
+      noTables: !resumeText.includes('<table') && !resumeText.includes('border'),
+      noColumns: !resumeText.includes('column') && !resumeText.includes('col-'),
+      noImages: !resumeText.includes('<img') && !resumeText.includes('image'),
+      noHeaders: !resumeText.includes('<header') && !resumeText.includes('header'),
+      noFooters: !resumeText.includes('<footer') && !resumeText.includes('footer')
+    };
+    
+    score += Object.values(formattingChecks).filter(Boolean).length * 3.33;
 
-    // Check for proper length
-    if (resumeText.length < 200) score -= 20;
-    if (resumeText.length > 2000) score -= 10;
+    // Check for proper length and structure (20 points)
+    if (resumeText.length >= 500 && resumeText.length <= 2000) {
+      score += 20;
+    } else if (resumeText.length < 500) {
+      score += 10;
+    } else if (resumeText.length > 2000) {
+      score += 15;
+    }
 
-    // Check for proper line breaks
-    const lineCount = resumeText.split('\n').length;
-    if (lineCount < 10) score -= 15;
+    // Check for proper contact information (20 points)
+    const contactInfo = {
+      email: /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/.test(resumeText),
+      phone: /\b\d{3}[-.]?\d{3}[-.]?\d{4}\b/.test(resumeText),
+      location: /(?:city|state|country|location|address)/i.test(resumeText),
+      name: /(?:name|full name)/i.test(resumeText),
+      linkedin: /(?:linkedin|linked-in)/i.test(resumeText)
+    };
+    
+    score += Object.values(contactInfo).filter(Boolean).length * 4;
 
-    // Check for proper spacing
-    if (resumeText.includes('  ')) score -= 10; // Double spaces
-    if (resumeText.includes('\t')) score -= 10; // Tabs
-
-    return Math.max(0, score);
+    return Math.min(100, score);
   };
 
   const calculateContentScore = (resumeText: string, sections: { [key: string]: number }): number => {
-    let score = 100;
+    let score = 0;
+    const resumeLower = resumeText.toLowerCase();
 
-    // Section completeness (40% of content score)
-    const sectionScore = Object.values(sections).reduce((sum, score) => sum + score, 0) * 25;
-    score = (score * 0.6) + (sectionScore * 0.4);
+    // Content Quality (40 points)
+    const contentQuality = {
+      hasNumbers: /\d+/.test(resumeText),
+      hasActionVerbs: /(?:achieved|developed|created|implemented|managed|increased|improved|led|organized|planned|designed|delivered|executed|established|generated|initiated|launched|optimized|performed|produced|reduced|resolved|streamlined|transformed|utilized)/i.test(resumeText),
+      hasProperCapitalization: /[A-Z][a-z]+/.test(resumeText),
+      hasProperSentences: resumeText.split('.').length >= 5,
+      hasKeywords: /(?:skills|experience|education|projects|certifications|achievements|accomplishments|responsibilities|duties|technologies|tools|software|languages|frameworks|platforms)/i.test(resumeText),
+      hasDates: /\b(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec|january|february|march|april|may|june|july|august|september|october|november|december)\b/i.test(resumeText),
+      hasEducation: /(?:bachelor|master|phd|degree|diploma|certificate|university|college|school)/i.test(resumeText),
+      hasSkills: /(?:programming|language|framework|tool|software|technology|skill|expertise|proficiency)/i.test(resumeText)
+    };
+    
+    score += Object.values(contentQuality).filter(Boolean).length * 5;
 
-    // Content quality checks
-    if (!resumeText.match(/\d+/)) score -= 10; // No numbers/quantifiable achievements
-    if (!resumeText.match(/[A-Z][a-z]+/)) score -= 10; // No proper capitalization
-    if (resumeText.split('.').length < 5) score -= 10; // Too few sentences
+    // Section Completeness (30 points)
+    const sectionScore = Object.values(sections).reduce((sum, score) => sum + score, 0) * 6;
+    score += sectionScore;
 
-    return Math.max(0, score);
+    // Achievement Quantification (30 points)
+    const achievementChecks = {
+      hasPercentages: /%\s*(?:increase|decrease|growth|improvement|reduction|enhancement|optimization|efficiency|productivity|performance|satisfaction|engagement|conversion|retention|revenue|sales|profit|cost|time|quality|accuracy|speed|scale|reach|impact)/i.test(resumeText),
+      hasNumbers: /\d+\s*(?:people|team|clients|projects|dollars|users|customers|members|employees|stakeholders|partners|vendors|suppliers|contracts|deals|accounts|transactions|orders|sales|revenue|profit|cost|budget|funding|investment)/i.test(resumeText),
+      hasTimeframes: /\d+\s*(?:months|years|weeks|days|hours|minutes|seconds|quarters|semesters|terms|periods|cycles|iterations|phases|stages)/i.test(resumeText),
+      hasMetrics: /(?:revenue|sales|efficiency|productivity|satisfaction|engagement|conversion|retention|growth|improvement|reduction|enhancement|optimization|performance|quality|accuracy|speed|scale|reach|impact)/i.test(resumeText),
+      hasResults: /(?:resulted in|led to|achieved|accomplished|delivered|produced|generated|created|established|implemented|developed|launched|initiated|executed|performed|resolved|streamlined|transformed|utilized|optimized)/i.test(resumeText)
+    };
+    
+    score += Object.values(achievementChecks).filter(Boolean).length * 6;
+
+    return Math.min(100, score);
   };
 
   const analyzeJobMatch = (resumeText: string, jobDesc: string) => {
@@ -238,6 +281,17 @@ export default function ATSScore() {
       const resumeText = await extractTextFromFile(resumeFile);
       const result = await analyzeResume(resumeText);
       setAnalysisResult(result);
+      
+      // Save ATS score to localStorage
+      localStorage.setItem('atsScore', result.score.toString());
+      
+      // Dispatch storage event to notify other components
+      window.dispatchEvent(new StorageEvent('storage', {
+        key: 'atsScore',
+        newValue: result.score.toString(),
+        oldValue: localStorage.getItem('atsScore'),
+        storageArea: localStorage
+      }));
     } catch (error) {
       toast({
         variant: "destructive",
@@ -340,22 +394,106 @@ export default function ATSScore() {
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <span className="text-lg font-medium">ATS Compatibility Score</span>
-                  <span className={`text-lg font-bold ${
-                    analysisResult.score >= 80 ? 'text-green-600' :
-                    analysisResult.score >= 60 ? 'text-yellow-600' :
-                    'text-red-600'
-                  }`}>
-                    {analysisResult.score}%
-                  </span>
+                  <div className="text-right">
+                    <span className={`text-3xl font-bold ${
+                      analysisResult.score >= 80 ? 'text-green-600' :
+                      analysisResult.score >= 60 ? 'text-yellow-600' :
+                      'text-red-600'
+                    }`}>
+                      {analysisResult.score}%
+                    </span>
+                    <div className="text-sm text-muted-foreground">
+                      {analysisResult.score >= 80 ? 'Excellent' :
+                       analysisResult.score >= 60 ? 'Good' :
+                       analysisResult.score >= 40 ? 'Fair' :
+                       'Needs Improvement'}
+                    </div>
+                  </div>
                 </div>
-                <Progress 
-                  value={analysisResult.score} 
-                  className={`h-3 ${
-                    analysisResult.score >= 80 ? 'bg-green-100' :
-                    analysisResult.score >= 60 ? 'bg-yellow-100' :
-                    'bg-red-100'
-                  }`}
-                />
+                <div className="space-y-2">
+                  <Progress 
+                    value={analysisResult.score} 
+                    className={`h-3 ${
+                      analysisResult.score >= 80 ? 'bg-green-100' :
+                      analysisResult.score >= 60 ? 'bg-yellow-100' :
+                      'bg-red-100'
+                    }`}
+                  />
+                  <div className="flex justify-between text-sm text-muted-foreground">
+                    <span>0%</span>
+                    <span>25%</span>
+                    <span>50%</span>
+                    <span>75%</span>
+                    <span>100%</span>
+                  </div>
+                </div>
+
+                {/* Score Breakdown */}
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="space-y-2 p-4 bg-blue-50 rounded-lg">
+                    <h4 className="font-medium text-blue-700">Formatting Score</h4>
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm">Section Structure</span>
+                        <span className="text-sm font-medium">30%</span>
+                      </div>
+                      <Progress value={30} className="h-2 bg-blue-100" />
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm">Formatting Elements</span>
+                        <span className="text-sm font-medium">30%</span>
+                      </div>
+                      <Progress value={30} className="h-2 bg-blue-100" />
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm">Length & Structure</span>
+                        <span className="text-sm font-medium">20%</span>
+                      </div>
+                      <Progress value={20} className="h-2 bg-blue-100" />
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm">Contact Information</span>
+                        <span className="text-sm font-medium">20%</span>
+                      </div>
+                      <Progress value={20} className="h-2 bg-blue-100" />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2 p-4 bg-green-50 rounded-lg">
+                    <h4 className="font-medium text-green-700">Content Score</h4>
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm">Content Quality</span>
+                        <span className="text-sm font-medium">40%</span>
+                      </div>
+                      <Progress value={40} className="h-2 bg-green-100" />
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm">Section Completeness</span>
+                        <span className="text-sm font-medium">30%</span>
+                      </div>
+                      <Progress value={30} className="h-2 bg-green-100" />
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm">Achievement Quantification</span>
+                        <span className="text-sm font-medium">30%</span>
+                      </div>
+                      <Progress value={30} className="h-2 bg-green-100" />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Score Summary */}
+                <div className="p-4 bg-gray-50 rounded-lg">
+                  <h4 className="font-medium text-gray-700 mb-2">Score Summary</h4>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm">Formatting (40% of total)</span>
+                      <span className="text-sm font-medium">{Math.round(analysisResult.score * 0.4)}%</span>
+                    </div>
+                    <Progress value={analysisResult.score * 0.4} className="h-2 bg-gray-200" />
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm">Content (60% of total)</span>
+                      <span className="text-sm font-medium">{Math.round(analysisResult.score * 0.6)}%</span>
+                    </div>
+                    <Progress value={analysisResult.score * 0.6} className="h-2 bg-gray-200" />
+                  </div>
+                </div>
               </div>
             </CardContent>
           </Card>

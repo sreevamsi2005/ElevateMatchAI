@@ -1,5 +1,4 @@
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Card,
   CardContent,
@@ -30,14 +29,80 @@ import {
   Award,
   Building,
   Users,
+  Target,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 
 export default function StudentDashboard() {
   const [progress, setProgress] = useState(65);
+  const [atsScore, setAtsScore] = useState(0);
+  const [overallScore, setOverallScore] = useState(0);
   const { userDetails } = useAuth();
   
   const firstName = userDetails?.first_name || "Student";
+
+  // Fetch ATS score from localStorage or API
+  const fetchATSScore = () => {
+    try {
+      // Try to get ATS score from localStorage
+      const savedATSScore = localStorage.getItem('atsScore');
+      if (savedATSScore) {
+        const score = parseInt(savedATSScore);
+        setAtsScore(score);
+      }
+    } catch (error) {
+      console.error('Error fetching ATS score:', error);
+    }
+  };
+
+  // Calculate overall progress based on multiple factors
+  const calculateOverallProgress = () => {
+    const weights = {
+      atsScore: 0.4,        // 40% weight for ATS score
+      resumeComplete: 0.2,  // 20% weight for resume completion
+      interviews: 0.2,      // 20% weight for interviews
+      skills: 0.2          // 20% weight for verified skills
+    };
+
+    const scores = {
+      atsScore: atsScore,
+      resumeComplete: 80,   // Resume completion percentage
+      interviews: 60,       // Interview completion percentage (3/5 interviews)
+      skills: 62.5         // Skills verification percentage (5/8 skills)
+    };
+
+    const weightedScore = 
+      (scores.atsScore * weights.atsScore) +
+      (scores.resumeComplete * weights.resumeComplete) +
+      (scores.interviews * weights.interviews) +
+      (scores.skills * weights.skills);
+
+    setOverallScore(Math.round(weightedScore));
+    setProgress(Math.round(weightedScore));
+  };
+
+  // Initialize scores on component mount
+  useEffect(() => {
+    fetchATSScore();
+  }, []);
+
+  // Update overall progress when ATS score changes
+  useEffect(() => {
+    calculateOverallProgress();
+  }, [atsScore]);
+
+  // Listen for ATS score updates from other components
+  useEffect(() => {
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'atsScore') {
+        const newScore = parseInt(e.newValue || '0');
+        setAtsScore(newScore);
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
 
   return (
     <DashboardLayout userType="student" navItems={navItems}>
@@ -62,50 +127,50 @@ export default function StudentDashboard() {
               <CardDescription>Your overall preparation score</CardDescription>
             </div>
             <Badge variant="outline" className="bg-primary/10 text-primary">
-              Level 3: Rising Star
+              {overallScore >= 80 ? 'Level 4: Expert' :
+               overallScore >= 60 ? 'Level 3: Rising Star' :
+               overallScore >= 40 ? 'Level 2: Developing' :
+               'Level 1: Beginner'}
             </Badge>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">Progress: {progress}%</span>
-                <span className="text-sm text-muted-foreground">{progress}/100</span>
-              </div>
-              <Progress value={progress} className="h-2" />
-            </div>
-            
-            <div className="grid grid-cols-2 gap-4 pt-2 md:grid-cols-4">
-              <div className="flex flex-col items-center gap-2 rounded-md border border-border bg-background p-3">
-                <FileText className="h-6 w-6 text-primary" />
-                <div className="text-center">
-                  <p className="text-sm font-medium">Resume</p>
-                  <p className="text-xs text-muted-foreground">80% Complete</p>
+          <CardContent>
+            <div className="space-y-4">
+              {/* Overall Progress */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">Overall Progress: {overallScore}%</span>
+                  <span className="text-sm text-muted-foreground">{overallScore}/100</span>
                 </div>
-              </div>
-              <div className="flex flex-col items-center gap-2 rounded-md border border-border bg-background p-3">
-                <MessageSquare className="h-6 w-6 text-primary" />
-                <div className="text-center">
-                  <p className="text-sm font-medium">Interviews</p>
-                  <p className="text-xs text-muted-foreground">3 Completed</p>
-                </div>
-              </div>
-              <div className="flex flex-col items-center gap-2 rounded-md border border-border bg-background p-3">
-                <Sparkles className="h-6 w-6 text-primary" />
-                <div className="text-center">
-                  <p className="text-sm font-medium">Skills</p>
-                  <p className="text-xs text-muted-foreground">5/8 Verified</p>
-                </div>
-              </div>
-              <div className="flex flex-col items-center gap-2 rounded-md border border-border bg-background p-3">
-                <Award className="h-6 w-6 text-primary" />
-                <div className="text-center">
-                  <p className="text-sm font-medium">Certificates</p>
-                  <p className="text-xs text-muted-foreground">2 Earned</p>
-                </div>
+                <Progress value={overallScore} className="h-2" />
               </div>
             </div>
           </CardContent>
         </Card>
+
+        {/* Progress Cards */}
+        <div className="grid grid-cols-2 gap-4 pt-2 md:grid-cols-3">
+          <div className="flex flex-col items-center gap-2 rounded-md border border-border bg-background p-3">
+            <FileText className="h-6 w-6 text-primary" />
+            <div className="text-center">
+              <p className="text-sm font-medium">Resume</p>
+              <p className="text-xs text-muted-foreground">80% Complete</p>
+            </div>
+          </div>
+          <div className="flex flex-col items-center gap-2 rounded-md border border-border bg-background p-3">
+            <MessageSquare className="h-6 w-6 text-primary" />
+            <div className="text-center">
+              <p className="text-sm font-medium">Interviews</p>
+              <p className="text-xs text-muted-foreground">3/5 Completed</p>
+            </div>
+          </div>
+          <div className="flex flex-col items-center gap-2 rounded-md border border-border bg-background p-3">
+            <Sparkles className="h-6 w-6 text-primary" />
+            <div className="text-center">
+              <p className="text-sm font-medium">Skills</p>
+              <p className="text-xs text-muted-foreground">5/8 Verified</p>
+            </div>
+          </div>
+        </div>
 
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {/* Recommended Jobs */}
