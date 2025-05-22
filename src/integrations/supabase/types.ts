@@ -9,6 +9,131 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      admin_users: {
+        Row: {
+          created_at: string | null
+          email: string
+          id: string
+          is_active: boolean | null
+        }
+        Insert: {
+          created_at?: string | null
+          email: string
+          id?: string
+          is_active?: boolean | null
+        }
+        Update: {
+          created_at?: string | null
+          email?: string
+          id?: string
+          is_active?: boolean | null
+        }
+        Relationships: []
+      }
+      chat_usage: {
+        Row: {
+          id: string
+          last_reset: string | null
+          message_count: number | null
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          last_reset?: string | null
+          message_count?: number | null
+          user_id: string
+        }
+        Update: {
+          id?: string
+          last_reset?: string | null
+          message_count?: number | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      job_applications: {
+        Row: {
+          cover_letter: string | null
+          created_at: string | null
+          email: string
+          full_name: string
+          id: string
+          job_id: string
+          phone: string | null
+          resume_url: string | null
+          status: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          cover_letter?: string | null
+          created_at?: string | null
+          email: string
+          full_name: string
+          id?: string
+          job_id: string
+          phone?: string | null
+          resume_url?: string | null
+          status?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          cover_letter?: string | null
+          created_at?: string | null
+          email?: string
+          full_name?: string
+          id?: string
+          job_id?: string
+          phone?: string | null
+          resume_url?: string | null
+          status?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_applications_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "job_postings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      job_postings: {
+        Row: {
+          created_at: string | null
+          description: string
+          duration: string | null
+          id: string
+          is_active: boolean | null
+          primary_role: string
+          skills: string[]
+          title: string
+        }
+        Insert: {
+          created_at?: string | null
+          description: string
+          duration?: string | null
+          id?: string
+          is_active?: boolean | null
+          primary_role: string
+          skills: string[]
+          title: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string
+          duration?: string | null
+          id?: string
+          is_active?: boolean | null
+          primary_role?: string
+          skills?: string[]
+          title?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           bio: string | null
@@ -59,7 +184,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      is_admin: {
+        Args: { user_email: string }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never

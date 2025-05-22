@@ -13,6 +13,8 @@ import NotFound from "./pages/NotFound";
 import Community from "./pages/Community";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
+import Careers from "./pages/Careers";
+import JobApplication from "./pages/JobApplication";
 
 // Auth pages
 import Login from "./pages/auth/Login";
@@ -53,6 +55,8 @@ const App = () => (
               <Route path="/community" element={<Community />} />
               <Route path="/about" element={<About />} />
               <Route path="/contact" element={<Contact />} />
+              <Route path="/careers" element={<Careers />} />
+              <Route path="/job-application/:jobId" element={<JobApplication />} />
               <Route path="/auth/callback" element={<AuthCallback />} />
               
               {/* Redirect old welcome page to dashboard */}

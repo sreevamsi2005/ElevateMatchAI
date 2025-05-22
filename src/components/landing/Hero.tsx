@@ -28,8 +28,8 @@ export function Hero() {
               <Link to="/signup">Get Started Free</Link>
             </Button>
             <Button asChild variant="outline" size="lg" className="h-12 px-6 font-medium">
-              <Link to="/how-it-works">
-                How It Works
+              <Link to="/careers">
+                View Careers
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>

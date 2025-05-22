@@ -19,8 +19,8 @@ export function CTA() {
               <Link to="/signup">Get Started Free</Link>
             </Button>
             <Button asChild variant="outline" size="lg" className="h-12 px-6 font-medium">
-              <Link to="/demo">
-                Request Demo
+              <Link to="/careers">
+                View Career Opportunities
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>
