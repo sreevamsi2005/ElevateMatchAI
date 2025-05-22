@@ -42,10 +42,8 @@ export default function StudentDashboard() {
   
   const firstName = userDetails?.first_name || "Student";
 
-  // Fetch ATS score from localStorage or API
   const fetchATSScore = () => {
     try {
-      // Try to get ATS score from localStorage
       const savedATSScore = localStorage.getItem('atsScore');
       if (savedATSScore) {
         const score = parseInt(savedATSScore);
@@ -56,20 +54,19 @@ export default function StudentDashboard() {
     }
   };
 
-  // Calculate overall progress based on multiple factors
   const calculateOverallProgress = () => {
     const weights = {
-      atsScore: 0.4,        // 40% weight for ATS score
-      resumeComplete: 0.2,  // 20% weight for resume completion
-      interviews: 0.2,      // 20% weight for interviews
-      skills: 0.2          // 20% weight for verified skills
+      atsScore: 0.4,
+      resumeComplete: 0.2,
+      interviews: 0.2,
+      skills: 0.2
     };
 
     const scores = {
       atsScore: atsScore,
-      resumeComplete: 80,   // Resume completion percentage
-      interviews: 60,       // Interview completion percentage (3/5 interviews)
-      skills: 62.5         // Skills verification percentage (5/8 skills)
+      resumeComplete: 80,
+      interviews: 60,
+      skills: 62.5
     };
 
     const weightedScore = 
@@ -82,17 +79,14 @@ export default function StudentDashboard() {
     setProgress(Math.round(weightedScore));
   };
 
-  // Initialize scores on component mount
   useEffect(() => {
     fetchATSScore();
   }, []);
 
-  // Update overall progress when ATS score changes
   useEffect(() => {
     calculateOverallProgress();
   }, [atsScore]);
 
-  // Listen for ATS score updates from other components
   useEffect(() => {
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === 'atsScore') {
@@ -120,7 +114,6 @@ export default function StudentDashboard() {
           </div>
         </div>
 
-        {/* Career Readiness */}
         <Card className="glass-card">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <div>
@@ -136,7 +129,6 @@ export default function StudentDashboard() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {/* Overall Progress */}
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium">Overall Progress: {overallScore}%</span>
@@ -148,7 +140,6 @@ export default function StudentDashboard() {
           </CardContent>
         </Card>
 
-        {/* Progress Cards */}
         <div className="grid grid-cols-2 gap-4 pt-2 md:grid-cols-3">
           <div className="flex flex-col items-center gap-2 rounded-md border border-border bg-background p-3">
             <FileText className="h-6 w-6 text-primary" />
@@ -174,7 +165,6 @@ export default function StudentDashboard() {
         </div>
 
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {/* Recommended Jobs */}
           <Card className="glass-card md:col-span-2">
             <CardHeader>
               <CardTitle className="text-lg">Recommended Jobs</CardTitle>
@@ -224,7 +214,6 @@ export default function StudentDashboard() {
             </CardContent>
           </Card>
 
-          {/* Upcoming Events */}
           <Card className="glass-card">
             <CardHeader>
               <CardTitle className="text-lg">Upcoming Events</CardTitle>
@@ -266,7 +255,6 @@ export default function StudentDashboard() {
           </Card>
         </div>
 
-        {/* Resume Builder Demo Card */}
         <Card className="bg-gradient-to-r from-primary/10 to-secondary/10 dark:from-primary/20 dark:to-secondary/20 shadow-lg">
           <CardHeader className="pb-3">
             <CardTitle>AI Resume Builder</CardTitle>
@@ -309,10 +297,9 @@ export default function StudentDashboard() {
             </div>
           </CardContent>
         </Card>
+
+        <ChatBot />
       </div>
-      
-      {/* ChatBot Component */}
-      <ChatBot />
     </DashboardLayout>
   );
 }
