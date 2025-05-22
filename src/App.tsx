@@ -26,6 +26,8 @@ import ResetPassword from "./pages/auth/ResetPassword";
 // Dashboard pages
 import StudentDashboard from "./pages/dashboard/StudentDashboard";
 import CompanyDashboard from "./pages/dashboard/CompanyDashboard";
+import AdminDashboard from "./pages/dashboard/AdminDashboard";
+import AdminUsers from "./pages/dashboard/AdminUsers";
 import UpdateProfile from "./pages/dashboard/UpdateProfile";
 import ResumeBuilder from "./pages/dashboard/ResumeBuilder";
 import Settings from "./pages/dashboard/Settings";
@@ -80,6 +82,12 @@ const App = () => (
                 <Route path="/company-dashboard/profile" element={<CompanyProfile />} />
                 <Route path="/company-dashboard/settings" element={<Settings />} />
                 <Route path="/company-dashboard/:section" element={<CompanyDashboard />} />
+                
+                {/* Admin Dashboard */}
+                <Route path="/admin-dashboard" element={<AdminDashboard />} />
+                <Route path="/admin-dashboard/users" element={<AdminUsers />} />
+                <Route path="/admin-dashboard/settings" element={<Settings />} />
+                <Route path="/admin-dashboard/:section" element={<AdminDashboard />} />
                 
                 {/* Catch-all route for 404 */}
                 <Route path="*" element={<NotFound />} />

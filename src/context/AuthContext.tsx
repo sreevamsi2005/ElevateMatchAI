@@ -24,6 +24,7 @@ interface AuthContextProps {
   user: User | null;
   userDetails: UserDetails | null;
   isLoading: boolean;
+  isAdmin: boolean;
   signUp: (email: string, password: string, metadata: any) => Promise<any>;
   signInWithEmail: (email: string, password: string) => Promise<any>;
   signInWithGoogle: () => Promise<any>;
@@ -31,6 +32,7 @@ interface AuthContextProps {
   refreshProfile: (userId: string) => Promise<void>;
   resetPassword: (email: string, redirectUrl?: string) => Promise<any>;
   updatePassword: (newPassword: string) => Promise<any>;
+  checkIsAdmin: (email: string) => Promise<boolean>;
 }
 
 export const AuthContext = createContext<AuthContextProps | undefined>(undefined);
@@ -40,6 +42,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [userDetails, setUserDetails] = useState<UserDetails | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -54,11 +57,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           // Defer profile fetch to avoid deadlocks
           setTimeout(() => {
             fetchUserProfile(currentSession.user.id);
+            checkIsAdmin(currentSession.user.email || "").then(isAdmin => {
+              setIsAdmin(isAdmin);
+            });
           }, 0);
         }
         
         if (event === 'SIGNED_OUT') {
           setUserDetails(null);
+          setIsAdmin(false);
         }
       }
     );
@@ -71,6 +78,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       if (currentSession?.user) {
         fetchUserProfile(currentSession.user.id);
+        checkIsAdmin(currentSession.user.email || "").then(isAdmin => {
+          setIsAdmin(isAdmin);
+        });
       }
       
       setIsLoading(false);
@@ -97,6 +107,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUserDetails(data);
     } catch (error) {
       console.error("Failed to fetch user profile:", error);
+    }
+  };
+
+  const checkIsAdmin = async (email: string): Promise<boolean> => {
+    if (!email) return false;
+    
+    try {
+      const { data, error } = await supabase.rpc('is_admin', { user_email: email });
+      
+      if (error) {
+        console.error("Error checking admin status:", error);
+        return false;
+      }
+      
+      return data || false;
+    } catch (error) {
+      console.error("Failed to check admin status:", error);
+      return false;
     }
   };
 
@@ -245,13 +273,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         user,
         userDetails,
         isLoading,
+        isAdmin,
         signUp,
         signInWithEmail,
         signInWithGoogle,
         signOut,
         refreshProfile,
         resetPassword,
-        updatePassword
+        updatePassword,
+        checkIsAdmin
       }}
     >
       {children}

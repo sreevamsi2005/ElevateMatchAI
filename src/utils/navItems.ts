@@ -1,4 +1,3 @@
-
 import {
   Home,
   FileText,
@@ -18,6 +17,9 @@ import {
   PanelLeft,
   FileSearch,
   BellRing,
+  UserRoundCog,
+  Shield,
+  Mail,
 } from "lucide-react";
 
 export const studentNavItems = [
@@ -128,6 +130,59 @@ export const companyNavItems = [
     title: "Settings",
     href: "/company-dashboard/settings",
     icon: Settings,
+  },
+];
+
+export const adminNavItems = [
+  {
+    title: "Overview",
+    href: "/admin-dashboard",
+    icon: Home,
+  },
+  {
+    title: "User Management",
+    href: "/admin-dashboard/users",
+    icon: Users,
+  },
+  {
+    title: "Company Management",
+    href: "/admin-dashboard/companies",
+    icon: Building,
+  },
+  {
+    title: "Job Postings",
+    href: "/admin-dashboard/jobs",
+    icon: Briefcase,
+  },
+  {
+    title: "Analytics",
+    href: "/admin-dashboard/analytics",
+    icon: LineChart,
+  },
+  {
+    title: "System Settings",
+    href: "/admin-dashboard/settings",
+    icon: Settings,
+  },
+  {
+    title: "Security",
+    href: "/admin-dashboard/security",
+    icon: Shield,
+  },
+  {
+    title: "Notifications",
+    href: "/admin-dashboard/notifications",
+    icon: BellRing,
+  },
+  {
+    title: "Support Inbox",
+    href: "/admin-dashboard/support",
+    icon: Mail,
+  },
+  {
+    title: "Profile",
+    href: "/admin-dashboard/profile",
+    icon: UserRoundCog,
   },
 ];
 
