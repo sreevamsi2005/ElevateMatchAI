@@ -7,21 +7,24 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
+  CardFooter,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { FileText, Upload, AlertCircle, CheckCircle2, Loader2, Info } from "lucide-react";
+import { FileText, Upload, AlertCircle, CheckCircle2, Loader2, Info, Target } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 
 interface AnalysisResult {
   score: number;
-  missingKeywords: string[];
   formattingIssues: string[];
   optimizationTips: string[];
+  jobMatchScore?: number;
+  matchingKeywords?: string[];
+  missingKeywords?: string[];
 }
 
 export default function ATSScore() {
@@ -73,67 +76,159 @@ export default function ATSScore() {
     });
   };
 
-  const analyzeResume = async (resumeText: string, jobDescription: string): Promise<AnalysisResult> => {
+  const analyzeResume = async (resumeText: string): Promise<AnalysisResult> => {
     const resumeLower = resumeText.toLowerCase();
-    const jobDescLower = jobDescription.toLowerCase();
 
-    // Extract keywords from job description
-    const keywords = jobDescLower
-      .split(/[\s,.-]+/)
-      .filter(word => word.length > 3)
-      .filter((word, index, self) => self.indexOf(word) === index);
+    // Calculate section scores
+    const sections = {
+      skills: resumeLower.includes('skills') ? 1 : 0,
+      experience: resumeLower.includes('experience') || resumeLower.includes('work') ? 1 : 0,
+      education: resumeLower.includes('education') || resumeLower.includes('academic') ? 1 : 0,
+      projects: resumeLower.includes('projects') || resumeLower.includes('portfolio') ? 1 : 0
+    };
 
-    // Find missing keywords
-    const missingKeywords = keywords.filter(keyword => !resumeLower.includes(keyword));
+    // Calculate formatting score
+    const formattingScore = calculateFormattingScore(resumeText);
 
-    // Calculate score based on keyword matches
-    const matchedKeywords = keywords.filter(keyword => resumeLower.includes(keyword));
-    const score = Math.round((matchedKeywords.length / keywords.length) * 100);
+    // Calculate content score
+    const contentScore = calculateContentScore(resumeText, sections);
 
-    // Analyze formatting
-    const formattingIssues = [];
-    if (resumeText.length < 200) {
-      formattingIssues.push("Resume appears too short");
-    }
-    if (resumeText.split('\n').length < 10) {
-      formattingIssues.push("Resume may lack proper section separation");
-    }
+    // Calculate total score
+    const totalScore = Math.round((formattingScore * 0.4) + (contentScore * 0.6));
 
-    // Generate optimization tips
-    const optimizationTips = [];
-    if (missingKeywords.length > 0) {
-      optimizationTips.push("Add missing keywords naturally in your experience descriptions");
-    }
-    if (score < 70) {
-      optimizationTips.push("Consider adding more relevant skills and experiences");
-    }
-    if (formattingIssues.length > 0) {
-      optimizationTips.push("Improve resume structure and formatting");
+    // Analyze job description match if provided
+    let jobMatchScore = undefined;
+    let matchingKeywords = undefined;
+    let missingKeywords = undefined;
+
+    if (jobDescription) {
+      const jobAnalysis = analyzeJobMatch(resumeLower, jobDescription.toLowerCase());
+      jobMatchScore = jobAnalysis.matchScore;
+      matchingKeywords = jobAnalysis.matchingKeywords;
+      missingKeywords = jobAnalysis.missingKeywords;
     }
 
     return {
-      score,
-      missingKeywords,
-      formattingIssues,
-      optimizationTips,
+      score: totalScore,
+      formattingIssues: [],
+      optimizationTips: [],
+      jobMatchScore,
+      matchingKeywords,
+      missingKeywords
+    };
+  };
+
+  const calculateFormattingScore = (resumeText: string): number => {
+    let score = 100;
+    
+    // Check for proper section separation
+    const sections = ['skills', 'experience', 'education', 'projects'];
+    const hasSections = sections.some(section => resumeText.toLowerCase().includes(section));
+    if (!hasSections) score -= 20;
+
+    // Check for bullet points
+    if (!resumeText.includes('•') && !resumeText.includes('-')) score -= 15;
+
+    // Check for proper length
+    if (resumeText.length < 200) score -= 20;
+    if (resumeText.length > 2000) score -= 10;
+
+    // Check for proper line breaks
+    const lineCount = resumeText.split('\n').length;
+    if (lineCount < 10) score -= 15;
+
+    // Check for proper spacing
+    if (resumeText.includes('  ')) score -= 10; // Double spaces
+    if (resumeText.includes('\t')) score -= 10; // Tabs
+
+    return Math.max(0, score);
+  };
+
+  const calculateContentScore = (resumeText: string, sections: { [key: string]: number }): number => {
+    let score = 100;
+
+    // Section completeness (40% of content score)
+    const sectionScore = Object.values(sections).reduce((sum, score) => sum + score, 0) * 25;
+    score = (score * 0.6) + (sectionScore * 0.4);
+
+    // Content quality checks
+    if (!resumeText.match(/\d+/)) score -= 10; // No numbers/quantifiable achievements
+    if (!resumeText.match(/[A-Z][a-z]+/)) score -= 10; // No proper capitalization
+    if (resumeText.split('.').length < 5) score -= 10; // Too few sentences
+
+    return Math.max(0, score);
+  };
+
+  const analyzeJobMatch = (resumeText: string, jobDesc: string) => {
+    // Extract keywords from job description
+    const keywords = new Set<string>();
+    const requiredKeywords = new Set<string>();
+    const preferredKeywords = new Set<string>();
+
+    // Split job description into lines and analyze each line
+    const lines = jobDesc.split('\n');
+    lines.forEach(line => {
+      const words = line.split(/[\s,.-]+/).filter(word => word.length > 3);
+      words.forEach(word => {
+        if (line.includes('required') || line.includes('must have') || line.includes('essential')) {
+          requiredKeywords.add(word);
+        } else if (line.includes('preferred') || line.includes('nice to have')) {
+          preferredKeywords.add(word);
+        }
+        keywords.add(word);
+      });
+    });
+
+    // Find matching and missing keywords
+    const matchingKeywords = Array.from(keywords).filter(keyword => 
+      resumeText.includes(keyword) || 
+      resumeText.includes(keyword + 's') || 
+      resumeText.includes(keyword + 'ing')
+    );
+
+    const missingKeywords = Array.from(keywords).filter(keyword => 
+      !resumeText.includes(keyword) && 
+      !resumeText.includes(keyword + 's') && 
+      !resumeText.includes(keyword + 'ing')
+    );
+
+    // Calculate match score with weights
+    const requiredMatches = Array.from(requiredKeywords).filter(keyword => 
+      resumeText.includes(keyword) || 
+      resumeText.includes(keyword + 's') || 
+      resumeText.includes(keyword + 'ing')
+    ).length;
+
+    const preferredMatches = Array.from(preferredKeywords).filter(keyword => 
+      resumeText.includes(keyword) || 
+      resumeText.includes(keyword + 's') || 
+      resumeText.includes(keyword + 'ing')
+    ).length;
+
+    const requiredScore = requiredKeywords.size > 0 ? (requiredMatches / requiredKeywords.size) * 100 : 100;
+    const preferredScore = preferredKeywords.size > 0 ? (preferredMatches / preferredKeywords.size) * 100 : 100;
+    const generalScore = keywords.size > 0 ? (matchingKeywords.length / keywords.size) * 100 : 100;
+
+    // Weighted score calculation
+    const matchScore = Math.round(
+      (requiredScore * 0.5) + // Required keywords are most important
+      (preferredScore * 0.3) + // Preferred keywords are secondary
+      (generalScore * 0.2) // General keyword matches
+    );
+
+    return {
+      matchScore,
+      matchingKeywords,
+      missingKeywords
     };
   };
 
   const calculateATSScore = async () => {
-    if (!resumeFile || !jobDescription) {
+    if (!resumeFile) {
       toast({
         variant: "destructive",
         title: "Missing information",
-        description: "Please upload a resume and provide a job description",
-      });
-      return;
-    }
-
-    if (jobDescription.length < 50) {
-      toast({
-        variant: "destructive",
-        title: "Job description too short",
-        description: "Please provide a more detailed job description for better analysis",
+        description: "Please upload a resume",
       });
       return;
     }
@@ -141,7 +236,7 @@ export default function ATSScore() {
     setIsLoading(true);
     try {
       const resumeText = await extractTextFromFile(resumeFile);
-      const result = await analyzeResume(resumeText, jobDescription);
+      const result = await analyzeResume(resumeText);
       setAnalysisResult(result);
     } catch (error) {
       toast({
@@ -159,11 +254,11 @@ export default function ATSScore() {
       <div>
         <h1 className="text-3xl font-bold tracking-tight">ATS Score</h1>
         <p className="text-muted-foreground">
-          Upload your resume and job description to check ATS compatibility
+          Upload your resume to check ATS compatibility
         </p>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2">
+      <div className="space-y-6">
         {/* Resume Upload Section */}
         <Card>
           <CardHeader>
@@ -177,9 +272,10 @@ export default function ATSScore() {
               <AlertDescription>
                 <ul className="list-disc pl-4 mt-2 space-y-1">
                   <li>Use a clear, well-formatted resume</li>
-                  <li>Include relevant skills and experiences</li>
+                  <li>Include all relevant sections (Skills, Experience, Education)</li>
                   <li>Keep file size under 5MB</li>
                   <li>Use standard fonts and formatting</li>
+                  <li>Include quantifiable achievements</li>
                 </ul>
               </AlertDescription>
             </Alert>
@@ -213,25 +309,74 @@ export default function ATSScore() {
                 </div>
               )}
             </div>
+            <CardFooter>
+              <Button
+                className="w-full"
+                onClick={calculateATSScore}
+                disabled={!resumeFile || isLoading}
+              >
+                {isLoading ? (
+                  <React.Fragment>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Analyzing...
+                  </React.Fragment>
+                ) : (
+                  "Calculate ATS Score"
+                )}
+              </Button>
+            </CardFooter>
           </CardContent>
         </Card>
+
+        {/* ATS Score Card */}
+        {analysisResult && (
+          <Card>
+            <CardHeader>
+              <CardTitle>ATS Compatibility Analysis</CardTitle>
+              <CardDescription>Your resume's general ATS compatibility score</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* Score Display */}
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-lg font-medium">ATS Compatibility Score</span>
+                  <span className={`text-lg font-bold ${
+                    analysisResult.score >= 80 ? 'text-green-600' :
+                    analysisResult.score >= 60 ? 'text-yellow-600' :
+                    'text-red-600'
+                  }`}>
+                    {analysisResult.score}%
+                  </span>
+                </div>
+                <Progress 
+                  value={analysisResult.score} 
+                  className={`h-3 ${
+                    analysisResult.score >= 80 ? 'bg-green-100' :
+                    analysisResult.score >= 60 ? 'bg-yellow-100' :
+                    'bg-red-100'
+                  }`}
+                />
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Job Description Section */}
         <Card>
           <CardHeader>
             <CardTitle>Job Description</CardTitle>
-            <CardDescription>Paste the job description to analyze</CardDescription>
+            <CardDescription>Paste the job description to analyze match percentage</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <Alert>
-              <Info className="h-4 w-4" />
+              <Target className="h-4 w-4" />
               <AlertTitle>Tips for best results</AlertTitle>
               <AlertDescription>
                 <ul className="list-disc pl-4 mt-2 space-y-1">
-                  <li>Include the full job description</li>
+                  <li>Include the complete job description</li>
                   <li>Copy directly from the job posting</li>
                   <li>Include required skills and qualifications</li>
-                  <li>Minimum 50 characters recommended</li>
+                  <li>Include preferred qualifications if any</li>
                 </ul>
               </AlertDescription>
             </Alert>
@@ -248,128 +393,142 @@ export default function ATSScore() {
               Characters: {jobDescription.length}
             </div>
           </CardContent>
+          <CardFooter>
+            <Button
+              className="w-full"
+              onClick={calculateATSScore}
+              disabled={!resumeFile || !jobDescription || isLoading}
+            >
+              {isLoading ? (
+                <React.Fragment>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Analyzing...
+                </React.Fragment>
+              ) : (
+                "Calculate Match Percentage"
+              )}
+            </Button>
+          </CardFooter>
         </Card>
-      </div>
 
-      <Button
-        className="w-full"
-        onClick={calculateATSScore}
-        disabled={!resumeFile || !jobDescription || isLoading}
-      >
-        {isLoading ? (
-          <React.Fragment>
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            Analyzing...
-          </React.Fragment>
-        ) : (
-          "Calculate ATS Score"
-        )}
-      </Button>
-
-      {/* Results Section */}
-      {analysisResult && (
-        <Card>
-          <CardHeader>
-            <CardTitle>ATS Analysis Results</CardTitle>
-            <CardDescription>Your resume's compatibility score and improvement suggestions</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            {/* Score Display */}
-            <div className="space-y-4">
+        {/* Job Description Match Card */}
+        {analysisResult && analysisResult.jobMatchScore !== undefined && (
+          <Card>
+            <CardHeader className="space-y-4">
               <div className="flex items-center justify-between">
-                <span className="text-lg font-medium">ATS Compatibility Score</span>
-                <span className={`text-lg font-bold ${
-                  analysisResult.score >= 80 ? 'text-green-600' :
-                  analysisResult.score >= 60 ? 'text-yellow-600' :
-                  'text-red-600'
-                }`}>
-                  {analysisResult.score}%
-                </span>
+                <div>
+                  <CardTitle>Job Description Match Analysis</CardTitle>
+                  <CardDescription>How well your resume matches the job requirements</CardDescription>
+                </div>
+                <div className="text-right">
+                  <div className={`text-3xl font-bold ${
+                    analysisResult.jobMatchScore >= 80 ? 'text-green-600' :
+                    analysisResult.jobMatchScore >= 60 ? 'text-yellow-600' :
+                    'text-red-600'
+                  }`}>
+                    {analysisResult.jobMatchScore}%
+                  </div>
+                  <div className="text-sm text-muted-foreground">Match Score</div>
+                </div>
               </div>
               <Progress 
-                value={analysisResult.score} 
-                className={`h-3 ${
-                  analysisResult.score >= 80 ? 'bg-green-100' :
-                  analysisResult.score >= 60 ? 'bg-yellow-100' :
+                value={analysisResult.jobMatchScore} 
+                className={`h-2 ${
+                  analysisResult.jobMatchScore >= 80 ? 'bg-green-100' :
+                  analysisResult.jobMatchScore >= 60 ? 'bg-yellow-100' :
                   'bg-red-100'
                 }`}
               />
-              <div className="mt-4">
-                {analysisResult.score >= 80 ? (
-                  <div className="space-y-2">
-                    <h3 className="font-medium text-green-700">Excellent ATS Compatibility</h3>
-                    <p className="text-sm text-gray-600">
-                      Your resume is well-optimized for ATS systems. Keep maintaining these best practices:
-                    </p>
-                    <ul className="list-disc pl-4 text-sm text-gray-600 space-y-1">
-                      <li>Continue using relevant keywords naturally in your content</li>
-                      <li>Maintain clear section headings and formatting</li>
-                      <li>Keep your resume concise and well-structured</li>
-                    </ul>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* Score Breakdown */}
+              <div className="grid gap-4 md:grid-cols-3">
+                <div className="space-y-2 p-4 bg-green-50 rounded-lg">
+                  <h4 className="font-medium text-green-700">Required Keywords</h4>
+                  <div className="text-2xl font-bold text-green-600">
+                    {Math.round((analysisResult.matchingKeywords?.filter(k => 
+                      jobDescription.toLowerCase().includes('required') || 
+                      jobDescription.toLowerCase().includes('must have') || 
+                      jobDescription.toLowerCase().includes('essential')
+                    ).length || 0) / (analysisResult.missingKeywords?.filter(k => 
+                      jobDescription.toLowerCase().includes('required') || 
+                      jobDescription.toLowerCase().includes('must have') || 
+                      jobDescription.toLowerCase().includes('essential')
+                    ).length || 1) * 100)}%
                   </div>
-                ) : analysisResult.score >= 60 ? (
-                  <div className="space-y-2">
-                    <h3 className="font-medium text-yellow-700">Good ATS Compatibility</h3>
-                    <p className="text-sm text-gray-600">
-                      Your resume has decent ATS compatibility. Here's how to improve it further:
-                    </p>
-                    <ul className="list-disc pl-4 text-sm text-gray-600 space-y-1">
-                      <li>Add more relevant keywords from the job description</li>
-                      <li>Ensure all sections are properly formatted</li>
-                      <li>Make your achievements more quantifiable</li>
-                      <li>Use bullet points for better readability</li>
-                    </ul>
+                  <p className="text-sm text-green-600">Match rate for required qualifications</p>
+                </div>
+                <div className="space-y-2 p-4 bg-yellow-50 rounded-lg">
+                  <h4 className="font-medium text-yellow-700">Preferred Keywords</h4>
+                  <div className="text-2xl font-bold text-yellow-600">
+                    {Math.round((analysisResult.matchingKeywords?.filter(k => 
+                      jobDescription.toLowerCase().includes('preferred') || 
+                      jobDescription.toLowerCase().includes('nice to have')
+                    ).length || 0) / (analysisResult.missingKeywords?.filter(k => 
+                      jobDescription.toLowerCase().includes('preferred') || 
+                      jobDescription.toLowerCase().includes('nice to have')
+                    ).length || 1) * 100)}%
                   </div>
-                ) : (
+                  <p className="text-sm text-yellow-600">Match rate for preferred qualifications</p>
+                </div>
+                <div className="space-y-2 p-4 bg-blue-50 rounded-lg">
+                  <h4 className="font-medium text-blue-700">Overall Match</h4>
+                  <div className="text-2xl font-bold text-blue-600">
+                    {Math.round((analysisResult.matchingKeywords?.length || 0) / 
+                      ((analysisResult.matchingKeywords?.length || 0) + (analysisResult.missingKeywords?.length || 0)) * 100)}%
+                  </div>
+                  <p className="text-sm text-blue-600">Total keyword match rate</p>
+                </div>
+              </div>
+
+              {/* Keyword Analysis */}
+              <div className="grid gap-6">
+                {/* Matching Keywords */}
+                {analysisResult.matchingKeywords && analysisResult.matchingKeywords.length > 0 && (
                   <div className="space-y-2">
-                    <h3 className="font-medium text-red-700">Needs Improvement</h3>
-                    <p className="text-sm text-gray-600">
-                      Your resume needs optimization to pass ATS screening. Focus on these areas:
-                    </p>
-                    <ul className="list-disc pl-4 text-sm text-gray-600 space-y-1">
-                      <li>Incorporate more keywords from the job description</li>
-                      <li>Improve section organization and formatting</li>
-                      <li>Add specific achievements and metrics</li>
-                      <li>Ensure all text is selectable (not in images)</li>
-                      <li>Use standard fonts and formatting</li>
-                    </ul>
+                    <h4 className="font-medium text-green-600">Matching Keywords</h4>
+                    <div className="flex flex-wrap gap-2">
+                      {analysisResult.matchingKeywords.map((keyword, index) => (
+                        <span key={index} className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-sm">
+                          {keyword}
+                        </span>
+                      ))}
+                    </div>
                   </div>
                 )}
-              </div>
-            </div>
 
-            {/* Formatting Issues */}
-            {analysisResult.formattingIssues.length > 0 && (
-              <div className="space-y-2">
-                <h3 className="font-medium">Formatting Improvements Needed</h3>
-                <div className="grid gap-2">
-                  {analysisResult.formattingIssues.map((issue, index) => (
-                    <Alert key={index} variant="default">
-                      <AlertCircle className="h-4 w-4" />
-                      <AlertTitle>{issue}</AlertTitle>
+                {/* Tips for Improvement */}
+                <div className="space-y-4">
+                  <h4 className="font-medium text-primary">Tips to Improve Your Score</h4>
+                  <div className="grid gap-3">
+                    <Alert>
+                      <Target className="h-4 w-4" />
+                      <AlertTitle>Optimize Your Resume Format</AlertTitle>
+                      <AlertDescription>
+                        Use standard fonts (Arial, Calibri, Times New Roman), clear section headers, and consistent formatting throughout your resume.
+                      </AlertDescription>
                     </Alert>
-                  ))}
+                    <Alert>
+                      <Target className="h-4 w-4" />
+                      <AlertTitle>Enhance Your Content</AlertTitle>
+                      <AlertDescription>
+                        Include quantifiable achievements (e.g., "Increased sales by 25%") and use industry-specific keywords naturally in your experience descriptions.
+                      </AlertDescription>
+                    </Alert>
+                    <Alert>
+                      <Target className="h-4 w-4" />
+                      <AlertTitle>Structure Your Resume</AlertTitle>
+                      <AlertDescription>
+                        Ensure you have all essential sections: Contact Information, Summary, Experience, Education, and Skills. List experiences in reverse chronological order.
+                      </AlertDescription>
+                    </Alert>
+                  </div>
                 </div>
               </div>
-            )}
-
-            {/* Optimization Tips */}
-            {analysisResult.optimizationTips.length > 0 && (
-              <div className="space-y-2">
-                <h3 className="font-medium">Key Optimization Tips</h3>
-                <div className="grid gap-2">
-                  {analysisResult.optimizationTips.map((tip, index) => (
-                    <Alert key={index} variant="default">
-                      <CheckCircle2 className="h-4 w-4" />
-                      <AlertTitle>{tip}</AlertTitle>
-                    </Alert>
-                  ))}
-                </div>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      )}
+            </CardContent>
+          </Card>
+        )}
+      </div>
     </div>
   );
 
