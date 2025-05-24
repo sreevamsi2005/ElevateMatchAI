@@ -51,7 +51,7 @@ export const studentNavItems = [
   },
   {
     title: "Skill Tests",
-    href: "/student-dashboard/skills",
+    href: "/student-dashboard/skill-test",
     icon: Sparkles,
   },
   {

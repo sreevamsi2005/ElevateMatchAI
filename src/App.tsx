@@ -15,7 +15,6 @@ import About from "./pages/About";
 import Contact from "./pages/Contact";
 import Careers from "./pages/Careers";
 import JobApplication from "./pages/JobApplication";
-import SkillTest from "./pages/SkillTest";
 
 // Auth pages
 import Login from "./pages/auth/Login";
@@ -36,6 +35,7 @@ import LearningPath from "./pages/dashboard/LearningPath";
 import OffCampusCalendar from "./pages/dashboard/OffCampusCalendar";
 import MockInterviews from "./pages/dashboard/MockInterviews";
 import ATSScore from "./pages/dashboard/ATSScore";
+import SkillTestPage from "./pages/dashboard/SkillTestPage";
 
 // Company pages
 import CompanyProfile from "./pages/dashboard/companyPages/CompanyProfile";
@@ -62,7 +62,6 @@ const App = () => (
                 <Route path="/contact" element={<Contact />} />
                 <Route path="/careers" element={<Careers />} />
                 <Route path="/job-application/:jobId" element={<JobApplication />} />
-                <Route path="/skill-test" element={<SkillTest />} />
                 <Route path="/auth/callback" element={<AuthCallback />} />
                 
                 {/* Redirect old welcome page to dashboard */}
@@ -78,6 +77,7 @@ const App = () => (
                 <Route path="/student-dashboard/learning" element={<LearningPath />} />
                 <Route path="/student-dashboard/off-campus" element={<OffCampusCalendar />} />
                 <Route path="/student-dashboard/ats-score" element={<ATSScore />} />
+                <Route path="/student-dashboard/skill-test" element={<SkillTestPage />} />
                 <Route path="/student-dashboard/:section" element={<StudentDashboard />} />
                 
                 {/* Company Dashboard */}
