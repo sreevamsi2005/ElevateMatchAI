@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -35,7 +35,34 @@ const mockQuestions = {
     "Explain the concept of middleware in Express.js.",
     "What are microservices and their benefits?",
   ],
-  // Add more domains and questions as needed
+  fullstack: [
+    "Explain the MERN stack architecture.",
+    "How do you handle state management in a full-stack application?",
+    "What are the best practices for API design?",
+    "How do you implement authentication in a full-stack application?",
+    "Explain the concept of server-side rendering.",
+  ],
+  devops: [
+    "What is CI/CD and why is it important?",
+    "Explain containerization and its benefits.",
+    "What is Infrastructure as Code (IaC)?",
+    "How do you handle monitoring and logging in a production environment?",
+    "Explain the concept of microservices architecture.",
+  ],
+  'data-science': [
+    "What is the difference between supervised and unsupervised learning?",
+    "Explain the concept of overfitting and how to prevent it.",
+    "What are the common evaluation metrics for classification problems?",
+    "How do you handle missing data in a dataset?",
+    "Explain the concept of feature engineering.",
+  ],
+  mobile: [
+    "What are the key differences between native and cross-platform development?",
+    "Explain the concept of mobile app architecture.",
+    "How do you handle offline functionality in mobile apps?",
+    "What are the best practices for mobile app security?",
+    "Explain the concept of mobile app testing strategies.",
+  ],
 };
 
 const SkillTest = () => {
@@ -44,14 +71,26 @@ const SkillTest = () => {
   const [showQuestions, setShowQuestions] = useState(false);
   const [currentQuestions, setCurrentQuestions] = useState<string[]>([]);
 
+  useEffect(() => {
+    console.log('SkillTest component mounted');
+  }, []);
+
   const handleStartTest = () => {
-    if (!selectedDomain || questionCount < 1) return;
+    console.log('Starting test with domain:', selectedDomain, 'and question count:', questionCount);
+    
+    if (!selectedDomain || questionCount < 1) {
+      console.log('Invalid domain or question count');
+      return;
+    }
 
     const domainQuestions = mockQuestions[selectedDomain as keyof typeof mockQuestions] || [];
+    console.log('Available questions for domain:', domainQuestions.length);
+    
     const selectedQuestions = domainQuestions
       .sort(() => Math.random() - 0.5)
       .slice(0, Math.min(questionCount, domainQuestions.length));
 
+    console.log('Selected questions:', selectedQuestions);
     setCurrentQuestions(selectedQuestions);
     setShowQuestions(true);
   };
@@ -68,7 +107,10 @@ const SkillTest = () => {
           <div className="space-y-6">
             <div className="space-y-2">
               <label className="text-sm font-medium">Select Domain</label>
-              <Select value={selectedDomain} onValueChange={setSelectedDomain}>
+              <Select value={selectedDomain} onValueChange={(value) => {
+                console.log('Domain selected:', value);
+                setSelectedDomain(value);
+              }}>
                 <SelectTrigger>
                   <SelectValue placeholder="Choose a domain" />
                 </SelectTrigger>
@@ -89,7 +131,11 @@ const SkillTest = () => {
                 min="1"
                 max="20"
                 value={questionCount}
-                onChange={(e) => setQuestionCount(parseInt(e.target.value) || 1)}
+                onChange={(e) => {
+                  const value = parseInt(e.target.value) || 1;
+                  console.log('Question count changed:', value);
+                  setQuestionCount(value);
+                }}
               />
             </div>
 
