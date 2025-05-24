@@ -66,11 +66,18 @@ export default function ATSScore() {
   };
 
   const extractTextFromFile = async (file: File): Promise<string> => {
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.onload = (e) => {
-        const text = e.target?.result as string;
-        resolve(text);
+        try {
+          const text = e.target?.result as string;
+          resolve(text);
+        } catch (error) {
+          reject(new Error('Failed to read file'));
+        }
+      };
+      reader.onerror = () => {
+        reject(new Error('Failed to read file'));
       };
       reader.readAsText(file);
     });
