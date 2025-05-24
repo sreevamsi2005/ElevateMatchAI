@@ -15,6 +15,7 @@ import About from "./pages/About";
 import Contact from "./pages/Contact";
 import Careers from "./pages/Careers";
 import JobApplication from "./pages/JobApplication";
+import SkillTest from "./pages/SkillTest";
 
 // Auth pages
 import Login from "./pages/auth/Login";
@@ -61,6 +62,7 @@ const App = () => (
                 <Route path="/contact" element={<Contact />} />
                 <Route path="/careers" element={<Careers />} />
                 <Route path="/job-application/:jobId" element={<JobApplication />} />
+                <Route path="/skill-test" element={<SkillTest />} />
                 <Route path="/auth/callback" element={<AuthCallback />} />
                 
                 {/* Redirect old welcome page to dashboard */}
