@@ -1,20 +1,8 @@
-import React, { useState } from "react";
+import { useState, useEffect } from "react";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
-import { navItems } from "@/utils/navItems";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-  CardFooter,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Loader2, Info, Target, CheckCircle2 } from "lucide-react";
-import { useToast } from "@/components/ui/use-toast";
 import {
   Select,
   SelectContent,
@@ -22,6 +10,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useToast } from "@/components/ui/use-toast";
+import { Progress } from "@/components/ui/progress";
+import { AlertCircle, Clock, CheckCircle2, AlertTriangle, ChevronLeft, ChevronRight } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { studentNavItems } from "@/utils/navItems";
 
 const domains = [
   { id: 'frontend', name: 'Frontend Development' },
@@ -108,151 +101,291 @@ const mockQuestions = {
   ],
 };
 
-export default function SkillTestPage() {
-  const [selectedDomain, setSelectedDomain] = useState('');
-  const [questionCount, setQuestionCount] = useState(5);
-  const [isLoading, setIsLoading] = useState(false);
-  const [questions, setQuestions] = useState<string[]>([]);
+const SkillTestPage = () => {
   const { toast } = useToast();
+  const [selectedDomain, setSelectedDomain] = useState("");
+  const [questionCount, setQuestionCount] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [questions, setQuestions] = useState<any[]>([]);
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [answers, setAnswers] = useState<{ [key: number]: string }>({});
+  const [timeLeft, setTimeLeft] = useState(0);
+  const [isTestComplete, setIsTestComplete] = useState(false);
+  const [showTimeWarning, setShowTimeWarning] = useState(false);
 
-  const handleStartTest = async () => {
-    try {
-      setIsLoading(true);
-      
-      if (!selectedDomain || questionCount < 1) {
+  // Timer effect with warning
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (timeLeft > 0 && !isTestComplete) {
+      // Show warning when 30 seconds remaining
+      if (timeLeft === 30) {
+        setShowTimeWarning(true);
         toast({
+          title: "Time Warning",
+          description: "30 seconds remaining!",
           variant: "destructive",
-          title: "Invalid Input",
-          description: "Please select a domain and specify the number of questions",
         });
-        return;
       }
 
+      timer = setInterval(() => {
+        setTimeLeft((prev) => {
+          if (prev <= 1) {
+            clearInterval(timer);
+            handleSubmit();
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    }
+    return () => clearInterval(timer);
+  }, [timeLeft, isTestComplete]);
+
+  const formatTime = (seconds: number) => {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;
+  };
+
+  const getTimeColor = (seconds: number) => {
+    if (seconds <= 30) return "text-red-500";
+    if (seconds <= 60) return "text-yellow-500";
+    return "text-green-500";
+  };
+
+  const handleStartTest = () => {
+    if (!selectedDomain || !questionCount) {
+      toast({
+        title: "Error",
+        description: "Please select a domain and number of questions",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const count = parseInt(questionCount);
+    if (count < 1 || count > 5) {
+      toast({
+        title: "Error",
+        description: "Please select between 1 and 5 questions",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsLoading(true);
+    // Simulate API call
+    setTimeout(() => {
       const domainQuestions = mockQuestions[selectedDomain as keyof typeof mockQuestions];
-      if (!domainQuestions || domainQuestions.length === 0) {
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: "No questions available for the selected domain",
-        });
-        return;
-      }
-
-      // Randomly select questions
       const selectedQuestions = domainQuestions
         .sort(() => Math.random() - 0.5)
-        .slice(0, Math.min(questionCount, domainQuestions.length));
-
+        .slice(0, count);
       setQuestions(selectedQuestions);
-      
-      toast({
-        title: "Test Generated",
-        description: "Your skill test has been generated successfully",
-      });
-    } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to generate test questions",
-      });
-    } finally {
+      setCurrentQuestionIndex(0);
+      setAnswers({});
+      setIsTestComplete(false);
+      setShowTimeWarning(false);
+      // Set timer: 2 minutes per question
+      setTimeLeft(count * 120);
       setIsLoading(false);
+    }, 1000);
+  };
+
+  const handleAnswerChange = (answer: string) => {
+    setAnswers((prev) => ({
+      ...prev,
+      [questions[currentQuestionIndex].id]: answer,
+    }));
+  };
+
+  const handleNext = () => {
+    if (currentQuestionIndex < questions.length - 1) {
+      setCurrentQuestionIndex((prev) => prev + 1);
     }
   };
 
+  const handlePrevious = () => {
+    if (currentQuestionIndex > 0) {
+      setCurrentQuestionIndex((prev) => prev - 1);
+    }
+  };
+
+  const handleSubmit = () => {
+    const unansweredQuestions = questions.filter(
+      (q) => !answers[q.id] || answers[q.id].trim() === ""
+    ).length;
+
+    if (unansweredQuestions > 0) {
+      const confirmSubmit = window.confirm(
+        `You have ${unansweredQuestions} unanswered question(s). Are you sure you want to submit?`
+      );
+      if (!confirmSubmit) return;
+    }
+
+    setIsTestComplete(true);
+    toast({
+      title: "Test Complete",
+      description: "Your answers have been submitted successfully!",
+    });
+  };
+
+  const progress = (currentQuestionIndex / questions.length) * 100;
+  const answeredQuestions = Object.keys(answers).length;
+  const totalQuestions = questions.length;
+
   return (
-    <DashboardLayout navItems={navItems} userType="student">
-      <div className="container mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold mb-8">Skill Assessment Test</h1>
-        
-        <Card className="max-w-2xl mx-auto">
-          <CardHeader>
-            <CardTitle>Configure Your Test</CardTitle>
-            <CardDescription>
-              Select your domain and specify the number of questions for your skill assessment test.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-6">
-              <div className="space-y-2">
-                <Label htmlFor="domain">Select Domain</Label>
-                <Select 
-                  value={selectedDomain} 
-                  onValueChange={setSelectedDomain}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Choose a domain" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {domains.map((domain) => (
-                      <SelectItem key={domain.id} value={domain.id}>
-                        {domain.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="questionCount">Number of Questions</Label>
-                <Input
-                  id="questionCount"
-                  type="number"
-                  min="1"
-                  max="20"
-                  value={questionCount}
-                  onChange={(e) => setQuestionCount(parseInt(e.target.value) || 1)}
-                />
-              </div>
-
-              <Button 
-                className="w-full"
-                onClick={handleStartTest}
-                disabled={!selectedDomain || questionCount < 1 || isLoading}
-              >
-                {isLoading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Generating Questions...
-                  </>
-                ) : (
-                  "Start Test"
-                )}
-              </Button>
+    <DashboardLayout userType="student" navItems={studentNavItems}>
+      <div className="container mx-auto p-6 space-y-6">
+        <div className="flex justify-between items-center">
+          <h1 className="text-3xl font-bold">Skill Assessment Test</h1>
+          {timeLeft > 0 && !isTestComplete && (
+            <div className={`flex items-center gap-2 text-lg font-semibold ${getTimeColor(timeLeft)}`}>
+              <Clock className="h-5 w-5" />
+              <span>{formatTime(timeLeft)}</span>
             </div>
-          </CardContent>
-        </Card>
+          )}
+        </div>
 
-        {questions.length > 0 && (
-          <Card className="max-w-2xl mx-auto mt-8">
+        {!questions.length && !isLoading && (
+          <Card>
             <CardHeader>
-              <CardTitle>Your Test Questions</CardTitle>
-              <CardDescription>
-                Answer these questions to assess your skills in {domains.find(d => d.id === selectedDomain)?.name}
-              </CardDescription>
+              <CardTitle>Start Your Skill Test</CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="space-y-6">
-                {questions.map((question, index) => (
-                  <div key={index} className="p-4 border rounded-lg">
-                    <p className="font-medium">Question {index + 1}:</p>
-                    <p className="mt-2">{question}</p>
-                  </div>
-                ))}
+            <CardContent className="space-y-4">
+              <div className="grid gap-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Select Domain</label>
+                  <Select
+                    value={selectedDomain}
+                    onValueChange={setSelectedDomain}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Choose a domain" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="frontend">Frontend Development</SelectItem>
+                      <SelectItem value="backend">Backend Development</SelectItem>
+                      <SelectItem value="fullstack">Full Stack Development</SelectItem>
+                      <SelectItem value="devops">DevOps</SelectItem>
+                      <SelectItem value="data_science">Data Science</SelectItem>
+                      <SelectItem value="mobile">Mobile Development</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Number of Questions</label>
+                  <Input
+                    type="number"
+                    min="1"
+                    max="5"
+                    value={questionCount}
+                    onChange={(e) => setQuestionCount(e.target.value)}
+                    placeholder="Enter number of questions (1-5)"
+                  />
+                </div>
+
+                <Button
+                  onClick={handleStartTest}
+                  disabled={isLoading}
+                  className="w-full"
+                >
+                  {isLoading ? "Loading..." : "Start Test"}
+                </Button>
               </div>
             </CardContent>
-            <CardFooter>
-              <Alert>
-                <Info className="h-4 w-4" />
-                <AlertTitle>Note</AlertTitle>
+          </Card>
+        )}
+
+        {questions.length > 0 && !isTestComplete && (
+          <div className="space-y-6">
+            <div className="flex justify-between items-center">
+              <Progress value={progress} className="h-2 flex-1" />
+              <span className="ml-4 text-sm text-muted-foreground">
+                {answeredQuestions}/{totalQuestions} Answered
+              </span>
+            </div>
+            
+            {showTimeWarning && (
+              <Alert variant="destructive">
+                <AlertTriangle className="h-4 w-4" />
                 <AlertDescription>
-                  Take your time to answer each question thoroughly. These questions are designed to test your knowledge and understanding of the selected domain.
+                  Time is running out! Please complete your answers.
                 </AlertDescription>
               </Alert>
-            </CardFooter>
-          </Card>
+            )}
+            
+            <Card>
+              <CardHeader>
+                <div className="flex justify-between items-center">
+                  <CardTitle>
+                    Question {currentQuestionIndex + 1} of {questions.length}
+                  </CardTitle>
+                  <span className={`text-sm font-medium ${getTimeColor(timeLeft)}`}>
+                    {formatTime(timeLeft)}
+                  </span>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <h3 className="text-lg font-medium">
+                    {questions[currentQuestionIndex].question}
+                  </h3>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Your Answer</label>
+                    <textarea
+                      className="w-full min-h-[150px] p-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      value={answers[questions[currentQuestionIndex].id] || ""}
+                      onChange={(e) => handleAnswerChange(e.target.value)}
+                      placeholder="Type your answer here..."
+                    />
+                  </div>
+                </div>
+
+                <div className="flex justify-between pt-4">
+                  <Button
+                    variant="outline"
+                    onClick={handlePrevious}
+                    disabled={currentQuestionIndex === 0}
+                    className="flex items-center gap-2"
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                    Previous
+                  </Button>
+                  {currentQuestionIndex === questions.length - 1 ? (
+                    <Button 
+                      onClick={handleSubmit}
+                      className="flex items-center gap-2"
+                    >
+                      Submit Test
+                      <CheckCircle2 className="h-4 w-4" />
+                    </Button>
+                  ) : (
+                    <Button 
+                      onClick={handleNext}
+                      className="flex items-center gap-2"
+                    >
+                      Next
+                      <ChevronRight className="h-4 w-4" />
+                    </Button>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {isTestComplete && (
+          <Alert>
+            <CheckCircle2 className="h-4 w-4" />
+            <AlertDescription>
+              Thank you for completing the test! Your answers have been submitted.
+            </AlertDescription>
+          </Alert>
         )}
       </div>
     </DashboardLayout>
   );
-} 
+};
+
+export default SkillTestPage; 
