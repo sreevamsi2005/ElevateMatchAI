@@ -38,37 +38,47 @@ export default function Login() {
 
     try {
       setIsLoading(true);
+      console.log("Attempting login with email:", email);
+      
       const { data, error } = await signInWithEmail(email, password);
       
       if (error) {
+        console.error("Login error:", error);
         toast.error(error.message);
         return;
       }
       
       if (data?.user) {
+        console.log("Login successful for user:", data.user.email);
         toast.success("Login successful!");
         
         // Check if user is admin first
+        console.log("Checking admin status for email:", email);
         const isAdmin = await checkIsAdmin(email);
+        console.log("Admin check result:", isAdmin);
         
         if (isAdmin) {
+          console.log("User is admin, redirecting to admin dashboard");
           navigate("/admin-dashboard");
           return;
         }
         
         // Get user type from user metadata for non-admin users
+        console.log("User is not admin, checking user metadata");
         const { data: userData } = await supabase.auth.getUser();
         const userType = userData?.user?.user_metadata?.user_type || 'student';
+        console.log("User type from metadata:", userType);
         
         // Redirect based on user type
         const dashboardPath = userType === "student" 
           ? "/student-dashboard" 
           : "/company-dashboard";
         
+        console.log("Redirecting to:", dashboardPath);
         navigate(dashboardPath);
       }
     } catch (error: any) {
-      console.error(error);
+      console.error("Login catch error:", error);
       toast.error(error.message || "Failed to sign in");
     } finally {
       setIsLoading(false);
