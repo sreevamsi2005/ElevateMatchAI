@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -18,7 +17,7 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { signInWithEmail, signInWithGoogle, userDetails } = useAuth();
+  const { signInWithEmail, signInWithGoogle, userDetails, checkIsAdmin } = useAuth();
   
   // Check for error parameter in URL
   const errorMessage = searchParams.get("error");
@@ -49,7 +48,15 @@ export default function Login() {
       if (data?.user) {
         toast.success("Login successful!");
         
-        // Get user type from user metadata
+        // Check if user is admin first
+        const isAdmin = await checkIsAdmin(email);
+        
+        if (isAdmin) {
+          navigate("/admin-dashboard");
+          return;
+        }
+        
+        // Get user type from user metadata for non-admin users
         const { data: userData } = await supabase.auth.getUser();
         const userType = userData?.user?.user_metadata?.user_type || 'student';
         

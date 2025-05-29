@@ -7,7 +7,7 @@ import { toast } from "sonner";
 
 export default function AuthCallback() {
   const navigate = useNavigate();
-  const { userDetails } = useAuth();
+  const { userDetails, checkIsAdmin } = useAuth();
 
   useEffect(() => {
     const handleAuthCallback = async () => {
@@ -26,6 +26,19 @@ export default function AuthCallback() {
       // Check if we have a session after processing the hash
       if (data.session) {
         console.log("Successfully authenticated with provider");
+        
+        // Get the user email and check if they're an admin
+        const userEmail = data.session.user.email;
+        
+        if (userEmail) {
+          const isAdmin = await checkIsAdmin(userEmail);
+          
+          if (isAdmin) {
+            toast.success("Successfully logged in as admin!");
+            navigate("/admin-dashboard");
+            return;
+          }
+        }
         
         // Get the user metadata to determine which dashboard to redirect to
         const { data: userData } = await supabase.auth.getUser();
@@ -47,7 +60,7 @@ export default function AuthCallback() {
     };
 
     handleAuthCallback();
-  }, [navigate, userDetails]);
+  }, [navigate, userDetails, checkIsAdmin]);
 
   return (
     <div className="h-screen flex items-center justify-center">
