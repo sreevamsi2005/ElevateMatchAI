@@ -38,6 +38,14 @@ import ATSScore from "./pages/dashboard/ATSScore";
 
 // Company pages
 import CompanyProfile from "./pages/dashboard/companyPages/CompanyProfile";
+import Overview from "./pages/dashboard/companyPages/overview/Overview";
+import JobPostings from "./pages/dashboard/companyPages/jobPostings/JobPostings";
+import CandidateDatabase from "./pages/dashboard/companyPages/candidateDatabase/CandidateDatabase";
+import Applications from "./pages/dashboard/companyPages/applications/Applications";
+import Interviews from "./pages/dashboard/companyPages/interviews/Interviews";
+import Analytics from "./pages/dashboard/companyPages/analytics/Analytics";
+import TalentPool from "./pages/dashboard/companyPages/talentPool/TalentPool";
+import Notifications from "./pages/dashboard/companyPages/notifications/Notifications";
 
 const queryClient = new QueryClient();
 
@@ -79,10 +87,16 @@ const App = () => (
                 <Route path="/student-dashboard/:section" element={<StudentDashboard />} />
                 
                 {/* Company Dashboard */}
-                <Route path="/company-dashboard" element={<CompanyDashboard />} />
+                <Route path="/company-dashboard" element={<Overview />} />
+                <Route path="/company-dashboard/jobs" element={<JobPostings />} />
+                <Route path="/company-dashboard/candidates" element={<CandidateDatabase />} />
+                <Route path="/company-dashboard/applications" element={<Applications />} />
+                <Route path="/company-dashboard/interviews" element={<Interviews />} />
+                <Route path="/company-dashboard/analytics" element={<Analytics />} />
+                <Route path="/company-dashboard/talent" element={<TalentPool />} />
+                <Route path="/company-dashboard/notifications" element={<Notifications />} />
                 <Route path="/company-dashboard/profile" element={<CompanyProfile />} />
                 <Route path="/company-dashboard/settings" element={<Settings />} />
-                <Route path="/company-dashboard/:section" element={<CompanyDashboard />} />
                 
                 {/* Admin Dashboard */}
                 <Route path="/admin-dashboard" element={<AdminDashboard />} />
