@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,23 +12,23 @@ import { Helmet } from "react-helmet-async";
 export default function AdminDashboard() {
   const { section } = useParams();
   const navigate = useNavigate();
-  const { userDetails, isLoading } = useAuth();
+  const { user, isAdmin, isLoading } = useAuth();
   
   // Redirect to login if not authenticated
   React.useEffect(() => {
-    if (!isLoading && !userDetails) {
+    if (!isLoading && !user) {
+      console.log("No user found, redirecting to login");
       navigate("/login");
     }
-  }, [userDetails, isLoading, navigate]);
+  }, [user, isLoading, navigate]);
 
-  // Simple admin check - in a real app, you would check against admin roles
-  const isAdmin = userDetails?.user_type === "admin";
-
+  // Check admin status using isAdmin from context
   React.useEffect(() => {
-    if (!isLoading && !isAdmin) {
+    if (!isLoading && user && !isAdmin) {
+      console.log("User is not admin, redirecting to login");
       navigate("/login");
     }
-  }, [isAdmin, isLoading, navigate]);
+  }, [isAdmin, isLoading, navigate, user]);
 
   if (isLoading) {
     return (
@@ -37,7 +38,7 @@ export default function AdminDashboard() {
     );
   }
 
-  if (!userDetails) {
+  if (!user || !isAdmin) {
     return null;
   }
 
