@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
@@ -30,26 +29,24 @@ import { toast } from "@/components/ui/sonner";
 
 export default function AdminUsers() {
   const navigate = useNavigate();
-  const { userDetails, isLoading } = useAuth();
+  const { user, isAdmin, isLoading } = useAuth();
   const [users, setUsers] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [isLoadingUsers, setIsLoadingUsers] = useState(true);
   
   // Redirect to login if not authenticated
   useEffect(() => {
-    if (!isLoading && !userDetails) {
+    if (!isLoading && !user) {
       navigate("/login");
     }
-  }, [userDetails, isLoading, navigate]);
+  }, [user, isLoading, navigate]);
 
-  // Simple admin check - in a real app, you would check against admin roles
-  const isAdmin = userDetails?.user_type === "admin";
-
+  // Check admin status using isAdmin from context
   useEffect(() => {
-    if (!isLoading && !isAdmin) {
+    if (!isLoading && user && !isAdmin) {
       navigate("/login");
     }
-  }, [isAdmin, isLoading, navigate]);
+  }, [isAdmin, isLoading, navigate, user]);
 
   useEffect(() => {
     async function fetchUsers() {
@@ -72,10 +69,10 @@ export default function AdminUsers() {
       }
     }
     
-    if (userDetails && isAdmin) {
+    if (user && isAdmin) {
       fetchUsers();
     }
-  }, [userDetails, isAdmin]);
+  }, [user, isAdmin]);
 
   const filteredUsers = users.filter((user) => {
     const searchValue = searchTerm.toLowerCase();
@@ -95,7 +92,7 @@ export default function AdminUsers() {
     );
   }
 
-  if (!userDetails) {
+  if (!user || !isAdmin) {
     return null;
   }
 
